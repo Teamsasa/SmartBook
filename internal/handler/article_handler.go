@@ -53,7 +53,7 @@ func (h *ArticleHandler) GetArticle(c echo.Context) error {
 func (h *ArticleHandler) GetRecommendedArticles(c echo.Context) error {
 	interests := c.QueryParam("interests")
 	userInterests := strings.Split(interests, ",")
-	
+
 	articles, err := h.articleUseCase.GetRecommendedArticles(userInterests)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
