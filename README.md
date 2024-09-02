@@ -28,6 +28,11 @@ Create DB container
 make docker-run
 ```
 
+DB migrate
+```bash
+make migrate
+```
+
 Shutdown DB container
 ```bash
 make docker-down
