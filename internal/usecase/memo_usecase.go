@@ -18,25 +18,10 @@ func NewMemoUseCase(db *gorm.DB) *MemoUseCase {
 }
 
 func (u *MemoUseCase) GetMemos(userID string) ([]model.Memo, error) {
-	// DBからユーザーIDを元にメモを取得
-	query := "SELECT ID, UserID, ArticleURL, Content, CreatedAt, UpdatedAt FROM memos WHERE UserID = $1"
-	rows, err := u.db.Query(query, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
 	var memos []model.Memo
-	for rows.Next() {
-		var memo model.Memo
-		if err := rows.Scan(&memo.ID, &memo.UserID, &memo.ArticleURL, &memo.Content, &memo.CreatedAt, &memo.UpdatedAt); err != nil {
-			return nil, err
-		}
-		memos = append(memos, memo)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
+	result := u.db.Where("user_id = ?", userID).Find(&memos)
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
 	return memos, nil
