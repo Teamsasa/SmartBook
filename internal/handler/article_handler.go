@@ -1,9 +1,10 @@
 package handler
 
 import (
+	"SmartBook/internal/usecase"
+	"html/template"
 	"net/http"
 	"strconv"
-	"SmartBook/internal/usecase"
 
 	"github.com/labstack/echo/v4"
 )
@@ -23,7 +24,13 @@ func (h *ArticleHandler) GetArticles(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-	return c.JSON(http.StatusOK, articles)
+
+	tmpl, err := template.ParseFiles("templates/articles.html")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Template parsing error"})
+	}
+
+	return tmpl.Execute(c.Response().Writer, articles)
 }
 
 func (h *ArticleHandler) GetArticle(c echo.Context) error {
