@@ -61,8 +61,19 @@ func (h *MemoHandler) GetMemoHandler(c echo.Context) error {
 
 	userID := ""
 
-	memoID := c.Param("memoId")
-	memo, err := h.memoUseCase.GetMemo(userID, memoID)
+	var req *model.MemoRequest
+	err := c.Bind(&req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	req.UserID = userID
+
+	if req.ArticleURL == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "article_url is required"})
+	}
+
+	memo, err := h.memoUseCase.GetMemo(req)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
@@ -76,8 +87,19 @@ func (h *MemoHandler) DeleteMemoHandler(c echo.Context) error {
 
 	userID := ""
 
-	memoID := c.Param("memoId")
-	if err := h.memoUseCase.DeleteMemo(userID, memoID); err != nil {
+	var req *model.MemoRequest
+	err := c.Bind(&req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	req.UserID = userID
+
+	if req.ArticleURL == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "article_url is required"})
+	}
+
+	if err := h.memoUseCase.DeleteMemo(req); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 

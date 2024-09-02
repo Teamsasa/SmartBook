@@ -41,9 +41,9 @@ func (u *MemoUseCase) GetMemos(userID string) ([]model.Memo, error) {
 	return memos, nil
 }
 
+// もしメモがすでに存在していたらupdate, そうでなければinsert
 func (u *MemoUseCase) UpsertMemo(memo *model.MemoRequest) error {
 
-	// もしメモがすでに存在していたらupdate, そうでなければinsert
 	query := "SELECT ID FROM memos WHERE UserID = $1 AND ArticleURL = $2"
 	rows, err := u.db.Query(query, memo.UserID, memo.ArticleURL)
 	if err != nil {
@@ -74,29 +74,31 @@ func (u *MemoUseCase) UpsertMemo(memo *model.MemoRequest) error {
 	return nil
 }
 
-func (u *MemoUseCase) GetMemo(userID, memoID string) (*model.Memo, error) {
-	query := "SELECT ID, UserID, ArticleURL, Content, CreatedAt, UpdatedAt FROM memos WHERE UserID = $1 AND ID = $2"
-	rows, err := u.db.Query(query, userID, memoID)
+func (u *MemoUseCase) GetMemo(memo *model.MemoRequest) (*model.Memo, error) {
+	query := "SELECT ID, UserID, ArticleURL, Content, CreatedAt, UpdatedAt FROM memos WHERE UserID = $1 AND ArticleURL = $2"
+	rows, err := u.db.Query(query, memo.UserID, memo.ArticleURL)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	if !rows.Next() {
-		return nil, nil
+	var m model.Memo
+	if rows.Next() {
+		if err := rows.Scan(&m.ID, &m.UserID, &m.ArticleURL, &m.Content, &m.CreatedAt, &m.UpdatedAt); err != nil {
+			return nil, err
+		}
 	}
 
-	var memo model.Memo
-	if err := rows.Scan(&memo.ID, &memo.UserID, &memo.ArticleURL, &memo.Content, &memo.CreatedAt, &memo.UpdatedAt); err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return &memo, nil
+	return &m, nil
 }
 
-func (u *MemoUseCase) DeleteMemo(userID, memoID string) error {
-	query := "DELETE FROM memos WHERE UserID = $1 AND ID = $2"
-	_, err := u.db.Exec(query, userID, memoID)
+func (u *MemoUseCase) DeleteMemo(memo *model.MemoRequest) error {
+	query := "DELETE FROM memos WHERE UserID = $1 AND ArticleURL = $2"
+	_, err := u.db.Exec(query, memo.UserID, memo.ArticleURL)
 	if err != nil {
 		return err
 	}
