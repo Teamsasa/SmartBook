@@ -32,21 +32,22 @@ func (h *MemoHandler) GetMemosHandler(c echo.Context) error {
 }
 
 func (h *MemoHandler) UpsertMemoHandler(c echo.Context) error {
-
-	var req *model.MemoRequest
 	userID := "" // tokenなりから取得
 	articleID := c.Param("articleId")
 
-	req.UserID = userID
-	req.ArticleID = articleID
+	if articleID == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "articleId is required"})
+	}
+
+	req := &model.MemoRequest{
+		UserID:    userID,
+		ArticleID: articleID,
+	}
 
 	// bodyからcontentを取得
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
-
-	req.UserID = userID
-	req.ArticleID = articleID
 
 	if req.Content == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "content is required"})
@@ -63,6 +64,10 @@ func (h *MemoHandler) GetMemoHandler(c echo.Context) error {
 	userID := "" // tokenなりから取得
 	articleID := c.Param("articleId")
 
+	if articleID == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "articleId is required"})
+	}
+
 	req := &model.MemoRequest{
 		UserID:    userID,
 		ArticleID: articleID,
@@ -78,20 +83,16 @@ func (h *MemoHandler) GetMemoHandler(c echo.Context) error {
 }
 
 func (h *MemoHandler) DeleteMemoHandler(c echo.Context) error {
-	// tokenなりからユーザーIDを取得
+	userID := "" // tokenなりから取得
+	articleID := c.Param("articleId")
 
-	userID := ""
-
-	var req *model.MemoRequest
-	err := c.Bind(&req)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	if articleID == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "articleId is required"})
 	}
 
-	req.UserID = userID
-
-	if req.ArticleURL == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "article_url is required"})
+	req := &model.MemoRequest{
+		UserID:    userID,
+		ArticleID: articleID,
 	}
 
 	if err := h.memoUseCase.DeleteMemo(req); err != nil {

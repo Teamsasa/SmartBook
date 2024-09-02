@@ -85,11 +85,10 @@ func (u *MemoUseCase) GetMemo(req *model.MemoRequest) (*model.Memo, error) {
 	return &memo, nil
 }
 
-func (u *MemoUseCase) DeleteMemo(memo *model.MemoRequest) error {
-	query := "DELETE FROM memos WHERE UserID = $1 AND ArticleURL = $2"
-	_, err := u.db.Exec(query, memo.UserID, memo.ArticleURL)
-	if err != nil {
-		return err
+func (u *MemoUseCase) DeleteMemo(req *model.MemoRequest) error {
+	result := u.db.Where("user_id = ? AND articleID = ?", req.UserID, req.ArticleID).Delete(&model.Memo{})
+	if result.Error != nil {
+		return result.Error
 	}
 
 	return nil
