@@ -56,7 +56,7 @@ func (u *ArticleUseCase) GetArticles() ([]Article, error) {
     }
 
     sort.Slice(articles, func(i, j int) bool {
-        return articles[i].Score > articles[j].Score
+        return articles[i].Time.After(articles[j].Time)
     })
 
     if len(articles) > 30 {
