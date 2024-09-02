@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"SmartBook/internal/model"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,7 +9,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"SmartBook/internal/model"
 )
 
 type ArticleUseCase struct {

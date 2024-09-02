@@ -2,11 +2,12 @@ package server
 
 import (
 	"fmt"
-	"gorm.io/gorm"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"gorm.io/gorm"
 
 	_ "github.com/joho/godotenv/autoload"
 
