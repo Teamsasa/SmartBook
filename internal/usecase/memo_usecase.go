@@ -1,17 +1,18 @@
 package usecase
 
 import (
-	"SmartBook/internal/database"
 	"SmartBook/internal/model"
 	"fmt"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type MemoUseCase struct {
-	db database.Service
+	db *gorm.DB
 }
 
-func NewMemoUseCase(db database.Service) *MemoUseCase {
+func NewMemoUseCase(db *gorm.DB) *MemoUseCase {
 	return &MemoUseCase{
 		db: db,
 	}
@@ -43,33 +44,33 @@ func (u *MemoUseCase) GetMemos(userID string) ([]model.Memo, error) {
 }
 
 // もしメモがすでに存在していたらupdate, そうでなければinsert
-func (u *MemoUseCase) UpsertMemo(memo *model.MemoRequest) error {
-
-	query := "SELECT ID FROM memos WHERE UserID = $1 AND ArticleURL = $2"
-	rows, err := u.db.Query(query, memo.UserID, memo.ArticleURL)
-	if err != nil {
-		return err
+func (u *MemoUseCase) UpsertMemo(req *model.MemoRequest) error {
+	// 既存のメモを取得
+	var memo model.Memo
+	result := u.db.Where("user_id = ? AND articleID = ?", req.UserID, req.ArticleID).First(&memo)
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		return result.Error
 	}
-	defer rows.Close()
 
-	if rows.Next() {
-		// update
-		query = "UPDATE memos SET Content = $1, UpdatedAt = $2 WHERE UserID = $3 AND ArticleURL = $4"
-		_, err := u.db.Exec(query, memo.Content, time.Now(), memo.UserID, memo.ArticleURL)
-		if err != nil {
-			return err
+	// メモが存在しない場合は新規作成
+	if result.Error == gorm.ErrRecordNotFound {
+		memo = model.Memo{
+			UserID:    req.UserID,
+			ArticleID: req.ArticleID,
+			Content:   req.Content,
+			UpdatedAt: time.Now(),
+			CreatedAt: time.Now(),
+		}
+		result = u.db.Create(&memo)
+		if result.Error != nil {
+			return result.Error
 		}
 	} else {
-		// insert
-		query = "INSERT INTO memos (UserID, ArticleURL, Content, CreatedAt, UpdatedAt) VALUES ($1, $2, $3, $4, $5)"
-		_, err := u.db.Exec(query, memo.UserID, memo.ArticleURL, memo.Content, time.Now(), time.Now())
-		if err != nil {
-			return err
+		// メモが存在する場合は更新
+		result = u.db.Model(&memo).Update("content", req.Content)
+		if result.Error != nil {
+			return result.Error
 		}
-	}
-
-	if err := rows.Err(); err != nil {
-		return err
 	}
 
 	return nil

@@ -32,28 +32,31 @@ func (h *MemoHandler) GetMemosHandler(c echo.Context) error {
 }
 
 func (h *MemoHandler) UpsertMemoHandler(c echo.Context) error {
-	// tokenなりからユーザーIDを取得
-
-	userID := ""
 
 	var req *model.MemoRequest
-	err := c.Bind(&req)
+	userID := "" // tokenなりから取得
+	articleID := c.Param("articleId")
 
-	if err != nil {
+	req.UserID = userID
+	req.ArticleID = articleID
+
+	// bodyからcontentを取得
+	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
 	req.UserID = userID
+	req.ArticleID = articleID
 
-	if req.ArticleURL == "" || req.Content == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "article_url and content are required"})
+	if req.Content == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "content is required"})
 	}
 
 	if err := h.memoUseCase.UpsertMemo(req); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusCreated, req)
+	return c.JSON(http.StatusCreated, map[string]string{"message": "memo created"})
 }
 
 func (h *MemoHandler) GetMemoHandler(c echo.Context) error {
