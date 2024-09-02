@@ -8,20 +8,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"SmartBook/internal/model"
 )
-
-type Article struct {
-	ID          string    `json:"id"`
-	ExternalID  string    `json:"external_id"`
-	Title       string    `json:"title"`
-	URL         string    `json:"url"`
-	Score       int       `json:"score"`
-	By          string    `json:"by"`
-	Time        time.Time `json:"time"`
-	Description string    `json:"description"`
-	Source      string    `json:"source"`
-	Tags        []string  `json:"tags"`
-}
 
 type ArticleUseCase struct {
 	client *http.Client
@@ -33,8 +21,8 @@ func NewArticleUseCase() *ArticleUseCase {
 	}
 }
 
-func (u *ArticleUseCase) GetLatestArticles() ([]Article, error) {
-	var articles []Article
+func (u *ArticleUseCase) GetLatestArticles() ([]model.Article, error) {
+	var articles []model.Article
 	var errors []error
 
 	hackerNewsArticles, err := u.getHackerNewsArticles()
@@ -65,7 +53,7 @@ func (u *ArticleUseCase) GetLatestArticles() ([]Article, error) {
 	return articles, nil
 }
 
-func (u *ArticleUseCase) getHackerNewsArticles() ([]Article, error) {
+func (u *ArticleUseCase) getHackerNewsArticles() ([]model.Article, error) {
 	resp, err := u.client.Get("https://hacker-news.firebaseio.com/v0/topstories.json")
 	if err != nil {
 		return nil, err
@@ -77,7 +65,7 @@ func (u *ArticleUseCase) getHackerNewsArticles() ([]Article, error) {
 		return nil, err
 	}
 
-	articles := make([]Article, 0, 30)
+	articles := make([]model.Article, 0, 30)
 	for i := 0; i < 30 && i < len(ids); i++ {
 		article, err := u.getHackerNewsArticleByID(ids[i])
 		if err != nil {
@@ -89,11 +77,11 @@ func (u *ArticleUseCase) getHackerNewsArticles() ([]Article, error) {
 	return articles, nil
 }
 
-func (u *ArticleUseCase) getHackerNewsArticleByID(id int) (Article, error) {
+func (u *ArticleUseCase) getHackerNewsArticleByID(id int) (model.Article, error) {
 	url := fmt.Sprintf("https://hacker-news.firebaseio.com/v0/item/%d.json", id)
 	resp, err := u.client.Get(url)
 	if err != nil {
-		return Article{}, err
+		return model.Article{}, err
 	}
 	defer resp.Body.Close()
 
@@ -106,10 +94,10 @@ func (u *ArticleUseCase) getHackerNewsArticleByID(id int) (Article, error) {
 		Time  int64  `json:"time"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&articleData); err != nil {
-		return Article{}, err
+		return model.Article{}, err
 	}
 
-	return Article{
+	return model.Article{
 		ID:         u.generateUniqueID("hn", articleData.ID),
 		ExternalID: fmt.Sprintf("hn_%d", articleData.ID),
 		Title:      articleData.Title,
@@ -121,7 +109,7 @@ func (u *ArticleUseCase) getHackerNewsArticleByID(id int) (Article, error) {
 	}, nil
 }
 
-func (u *ArticleUseCase) getDevToArticles() ([]Article, error) {
+func (u *ArticleUseCase) getDevToArticles() ([]model.Article, error) {
 	url := "https://dev.to/api/articles?top=30"
 	resp, err := u.client.Get(url)
 	if err != nil {
@@ -145,10 +133,10 @@ func (u *ArticleUseCase) getDevToArticles() ([]Article, error) {
 		return nil, err
 	}
 
-	articles := make([]Article, 0, len(devToArticles))
+	articles := make([]model.Article, 0, len(devToArticles))
 	for _, a := range devToArticles {
 		publishedTime, _ := time.Parse(time.RFC3339, a.PublishedAt)
-		article := Article{
+		article := model.Article{
 			ID:         u.generateUniqueID("dev", a.ID),
 			ExternalID: fmt.Sprintf("dev_%d", a.ID),
 			Title:      a.Title,
@@ -169,7 +157,7 @@ func (u *ArticleUseCase) generateUniqueID(source string, externalID int) string 
 	return fmt.Sprintf("%s_%d", source, externalID)
 }
 
-func (u *ArticleUseCase) GetRecommendedArticles(userInterests []string) ([]Article, error) {
+func (u *ArticleUseCase) GetRecommendedArticles(userInterests []string) ([]model.Article, error) {
 	// 現在は記事の題名とタグに興味を持っているかどうかでスコアを計算
 	allArticles, err := u.GetLatestArticles()
 	if err != nil {
@@ -178,7 +166,7 @@ func (u *ArticleUseCase) GetRecommendedArticles(userInterests []string) ([]Artic
 
 	// 記事をスコア付け
 	scoredArticles := make([]struct {
-		Article Article
+		Article model.Article
 		Score   float64
 	}, len(allArticles))
 
@@ -198,7 +186,7 @@ func (u *ArticleUseCase) GetRecommendedArticles(userInterests []string) ([]Artic
 		}
 
 		scoredArticles[i] = struct {
-			Article Article
+			Article model.Article
 			Score   float64
 		}{Article: article, Score: score}
 	}
@@ -209,7 +197,7 @@ func (u *ArticleUseCase) GetRecommendedArticles(userInterests []string) ([]Artic
 	})
 
 	// 上位30記事を返す
-	recommendedArticles := make([]Article, 0, 30)
+	recommendedArticles := make([]model.Article, 0, 30)
 	for i := 0; i < 30 && i < len(scoredArticles); i++ {
 		recommendedArticles = append(recommendedArticles, scoredArticles[i].Article)
 	}
@@ -217,7 +205,7 @@ func (u *ArticleUseCase) GetRecommendedArticles(userInterests []string) ([]Artic
 	return recommendedArticles, nil
 }
 
-func (u *ArticleUseCase) GetArticleByID(id string) (*Article, error) {
+func (u *ArticleUseCase) GetArticleByID(id string) (*model.Article, error) {
 	articles, err := u.GetLatestArticles()
 	if err != nil {
 		return nil, err
@@ -233,7 +221,7 @@ func (u *ArticleUseCase) GetArticleByID(id string) (*Article, error) {
 }
 
 // オプション: 外部IDでも記事を取得できるようにするメソッド
-func (u *ArticleUseCase) GetArticleByExternalID(externalID string) (*Article, error) {
+func (u *ArticleUseCase) GetArticleByExternalID(externalID string) (*model.Article, error) {
 	articles, err := u.GetLatestArticles()
 	if err != nil {
 		return nil, err

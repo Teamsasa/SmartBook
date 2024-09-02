@@ -2,6 +2,7 @@ package handler
 
 import (
 	"SmartBook/internal/usecase"
+	"SmartBook/internal/model"
 	"html/template"
 	"net/http"
 	"strings"
@@ -22,10 +23,10 @@ func NewArticleHandler(articleUseCase *usecase.ArticleUseCase) *ArticleHandler {
 	}
 }
 
-func (h *ArticleHandler) renderTemplate(c echo.Context, articles []usecase.Article, title string) error {
+func (h *ArticleHandler) renderTemplate(c echo.Context, articles []model.Article, title string) error {
 	data := struct {
 		Title    string
-		Articles []usecase.Article
+		Articles []model.Article
 	}{
 		Title:    title,
 		Articles: articles,
