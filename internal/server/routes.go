@@ -12,21 +12,45 @@ func (s *Server) RegisterRoutes() http.Handler {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.GET("/", s.HelloWorldHandler)
+	api := e.Group("/api")
+	{
+		// ユーザー関連
+		user := api.Group("/users")
+		{
+			user.GET("/users/:userId", s.getUserHandler)
+			user.PUT("/users/:userId", s.updateUserHandler)
+		}
 
-	e.GET("/health", s.healthHandler)
+		// 記事関連
+		article := api.Group("/articles")
+		{
+			article.GET("/articles", s.getArticlesHandler)
+			article.GET("/articles/:articleId", s.getArticleHandler)
+			article.GET("/articles/recommended", s.getRecommendedArticlesHandler)
+		}
+
+		// メモ関連
+		memo := api.Group("/memos")
+		{
+			memo.GET("/memos", s.getMemosHandler)
+			memo.POST("/memos", s.createMemoHandler)
+			memo.GET("/memos/:memoId", s.getMemoHandler)
+			memo.PUT("/memos/:memoId", s.updateMemoHandler)
+			memo.DELETE("/memos/:memoId", s.deleteMemoHandler)
+		}
+	}
 
 	return e
 }
 
-func (s *Server) HelloWorldHandler(c echo.Context) error {
-	resp := map[string]string{
-		"message": "Hello World",
-	}
+// func (s *Server) HelloWorldHandler(c echo.Context) error {
+// 	resp := map[string]string{
+// 		"message": "Hello World",
+// 	}
 
-	return c.JSON(http.StatusOK, resp)
-}
+// 	return c.JSON(http.StatusOK, resp)
+// }
 
-func (s *Server) healthHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, s.db.Health())
-}
+// func (s *Server) healthHandler(c echo.Context) error {
+// 	return c.JSON(http.StatusOK, s.db.Health())
+// }
