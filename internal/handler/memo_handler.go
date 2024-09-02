@@ -61,12 +61,10 @@ func (h *MemoHandler) GetMemoHandler(c echo.Context) error {
 
 	userID := ""
 
-	var req *model.MemoRequest
-	err := c.Bind(&req)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	}
-
+	// article_urlをクエリパラメータから取得
+	req := &model.MemoRequest{}
+	articleURL := c.QueryParam("article_url")
+	req.ArticleURL = articleURL
 	req.UserID = userID
 
 	if req.ArticleURL == "" {
