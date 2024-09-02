@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tech Articles</title>
+    <title>{{.Title}}</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
         h1 { color: #333; }
@@ -11,16 +11,25 @@
         li { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         a { color: #0066cc; text-decoration: none; }
         a:hover { text-decoration: underline; }
-        .score { color: #666; font-size: 0.9em; }
+        .metadata { color: #666; font-size: 0.9em; }
+        .source { font-weight: bold; }
+        .tags { color: #009900; }
     </style>
 </head>
 <body>
-    <h1>Tech Articles</h1>
+    <h1>{{.Title}}</h1>
     <ul>
-        {{range .}}
+        {{range .Articles}}
         <li>
-            <h2><a href="{{.URL}}">{{.Title}}</a></h2>
-            <p class="score">Score: {{.Score}} | By: {{.By}}</p>
+            <h2><a href="{{.URL}}" target="_blank">{{.Title}}</a></h2>
+            <p class="metadata">
+                Score: {{.Score}} | By: {{.By}} | 
+                <span class="source">Source: {{.Source}}</span> | 
+                Time: {{.Time.Format "2006-01-02 15:04:05"}}
+            </p>
+            {{if .Tags}}
+            <p class="tags">Tags: {{range .Tags}}{{.}} {{end}}</p>
+            {{end}}
         </li>
         {{end}}
     </ul>
