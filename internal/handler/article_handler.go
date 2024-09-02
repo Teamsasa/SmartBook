@@ -4,7 +4,7 @@ import (
 	"SmartBook/internal/usecase"
 	"html/template"
 	"net/http"
-	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -34,36 +34,33 @@ func (h *ArticleHandler) GetArticles(c echo.Context) error {
 }
 
 func (h *ArticleHandler) GetArticle(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("articleId"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid article ID"})
-	}
+	id := c.Param("articleId")
 	article, err := h.articleUseCase.GetArticleByID(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-	}
-	if article == nil {
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "Article not found"})
 	}
 	return c.JSON(http.StatusOK, article)
 }
 
 func (h *ArticleHandler) GetRecommendedArticles(c echo.Context) error {
-	articles, err := h.articleUseCase.GetRecommendedArticles()
+	interests := c.QueryParam("interests")
+	userInterests := strings.Split(interests, ",")
+	
+	articles, err := h.articleUseCase.GetRecommendedArticles(userInterests)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	return c.JSON(http.StatusOK, articles)
 }
 
-func (h *ArticleHandler) GetArticleContent(c echo.Context) error {
-	url := c.QueryParam("url")
-	if url == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "URL parameter is required"})
-	}
-	content, err := h.articleUseCase.GetArticleContent(url)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-	}
-	return c.HTML(http.StatusOK, content)
-}
+// func (h *ArticleHandler) GetArticleContent(c echo.Context) error {
+// 	url := c.QueryParam("url")
+// 	if url == "" {
+// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "URL parameter is required"})
+// 	}
+// 	content, err := h.articleUseCase.GetArticleContent(url)
+// 	if err != nil {
+// 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+// 	}
+// 	return c.HTML(http.StatusOK, content)
+// }
