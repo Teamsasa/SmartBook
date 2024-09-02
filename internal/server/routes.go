@@ -25,7 +25,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 		article := api.Group("/articles")
 		{
 			article.GET("", s.articleHandler.GetArticles)
-			article.GET("", s.articleHandler.GetArticles)
 			article.GET("/:articleId", s.articleHandler.GetArticle)
 			article.GET("/recommended", s.articleHandler.GetRecommendedArticles)
 			article.GET("/content", s.articleHandler.GetArticleContent)
