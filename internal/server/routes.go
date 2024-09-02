@@ -24,10 +24,10 @@ func (s *Server) RegisterRoutes() http.Handler {
 		// 記事関連
 		article := api.Group("/articles")
 		{
-			article.GET("", s.articleHandler.GetArticles)
+			article.GET("/latest", s.articleHandler.GetLatestArticles)
 			article.GET("/:articleId", s.articleHandler.GetArticle)
 			article.GET("/recommended", s.articleHandler.GetRecommendedArticles)
-			article.GET("/content", s.articleHandler.GetArticleContent)
+			// article.GET("/content", s.articleHandler.GetArticleContent)
 		}
 
 		// メモ関連
