@@ -33,7 +33,7 @@ func NewArticleUseCase() *ArticleUseCase {
 	}
 }
 
-func (u *ArticleUseCase) GetArticles() ([]Article, error) {
+func (u *ArticleUseCase) GetLatestArticles() ([]Article, error) {
     var articles []Article
     var errors []error
 
@@ -171,7 +171,7 @@ func (u *ArticleUseCase) generateUniqueID(source string, externalID int) string 
 
 func (u *ArticleUseCase) GetRecommendedArticles(userInterests []string) ([]Article, error) {
 	// 現在は記事の題名とタグに興味を持っているかどうかでスコアを計算
-	allArticles, err := u.GetArticles()
+	allArticles, err := u.GetLatestArticles()
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +218,7 @@ func (u *ArticleUseCase) GetRecommendedArticles(userInterests []string) ([]Artic
 }
 
 func (u *ArticleUseCase) GetArticleByID(id string) (*Article, error) {
-	articles, err := u.GetArticles()
+	articles, err := u.GetLatestArticles()
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func (u *ArticleUseCase) GetArticleByID(id string) (*Article, error) {
 
 // オプション: 外部IDでも記事を取得できるようにするメソッド
 func (u *ArticleUseCase) GetArticleByExternalID(externalID string) (*Article, error) {
-	articles, err := u.GetArticles()
+	articles, err := u.GetLatestArticles()
 	if err != nil {
 		return nil, err
 	}
