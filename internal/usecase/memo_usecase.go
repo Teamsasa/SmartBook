@@ -41,7 +41,7 @@ func (u *MemoUseCase) GetMemos(userID string) ([]model.Memo, error) {
 	return memos, nil
 }
 
-func (u *MemoUseCase) CreateMemo(memo *model.Memo) error {
+func (u *MemoUseCase) CreateMemo(memo *model.MemoRequest) error {
 
 	// もしメモがすでに存在していたらupdate, そうでなければinsert
 	query := "SELECT ID FROM memos WHERE UserID = $1 AND ArticleURL = $2"

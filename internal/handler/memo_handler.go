@@ -36,17 +36,24 @@ func (h *MemoHandler) CreateMemoHandler(c echo.Context) error {
 
 	userID := ""
 
-	memo := &model.Memo{
-		UserID:     userID,
-		ArticleURL: c.FormValue("article_url"),
-		Content:    c.FormValue("content"),
+	var req *model.MemoRequest
+	err := c.Bind(&req)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	if err := h.memoUseCase.CreateMemo(memo); err != nil {
+	req.UserID = userID
+
+	if req.ArticleURL == "" || req.Content == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "article_url and content are required"})
+	}
+
+	if err := h.memoUseCase.CreateMemo(req); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusCreated, memo)
+	return c.JSON(http.StatusCreated, req)
 }
 
 func (h *MemoHandler) GetMemoHandler(c echo.Context) error {

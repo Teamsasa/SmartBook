@@ -10,3 +10,9 @@ type Memo struct {
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
+
+type MemoRequest struct {
+	UserID     string
+	ArticleURL string `json:"article_url"`
+	Content    string `json:"content"`
+}
