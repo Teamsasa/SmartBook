@@ -18,6 +18,7 @@ type Server struct {
 	port           int
 	db             database.Service
 	articleHandler *handler.ArticleHandler
+	memoHandler    *handler.MemoHandler
 }
 
 func NewServer() *http.Server {
@@ -25,11 +26,14 @@ func NewServer() *http.Server {
 	db := database.New()
 	articleUseCase := usecase.NewArticleUseCase()
 	articleHandler := handler.NewArticleHandler(articleUseCase)
+	memoUseCase := usecase.NewMemoUseCase(db)
+	memoHandler := handler.NewMemoHandler(memoUseCase)
 
 	newServer := &Server{
 		port:           port,
 		db:             db,
 		articleHandler: articleHandler,
+		memoHandler:    memoHandler,
 	}
 
 	// Declare Server config
