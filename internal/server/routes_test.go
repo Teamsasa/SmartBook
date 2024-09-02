@@ -1,31 +1,39 @@
 package server
 
 import (
-	"io"
+	"encoding/json"
+	"github.com/labstack/echo/v4"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 )
 
 func TestHandler(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	resp := httptest.NewRecorder()
+	c := e.NewContext(req, resp)
 	s := &Server{}
-	server := httptest.NewServer(http.HandlerFunc(s.HelloWorldHandler))
-	defer server.Close()
-	resp, err := http.Get(server.URL)
-	if err != nil {
-		t.Fatalf("error making request to server. Err: %v", err)
-	}
-	defer resp.Body.Close()
 	// Assertions
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("expected status OK; got %v", resp.Status)
+	if err := s.HelloWorldHandler(c); err != nil {
+		t.Errorf("handler() error = %v", err)
+		return
 	}
-	expected := "{\"message\":\"Hello World\"}"
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("error reading response body. Err: %v", err)
+	if resp.Code != http.StatusOK {
+		t.Errorf("handler() wrong status code = %v", resp.Code)
+		return
 	}
-	if expected != string(body) {
-		t.Errorf("expected response body to be %v; got %v", expected, string(body))
+	expected := map[string]string{"message": "Hello World"}
+	var actual map[string]string
+	// Decode the response body into the actual map
+	if err := json.NewDecoder(resp.Body).Decode(&actual); err != nil {
+		t.Errorf("handler() error decoding response body: %v", err)
+		return
+	}
+	// Compare the decoded response with the expected value
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("handler() wrong response body. expected = %v, actual = %v", expected, actual)
+		return
 	}
 }

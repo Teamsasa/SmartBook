@@ -1,39 +1,32 @@
 package server
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", s.HelloWorldHandler)
+	e.GET("/", s.HelloWorldHandler)
 
-	mux.HandleFunc("/health", s.healthHandler)
+	e.GET("/health", s.healthHandler)
 
-	return mux
+	return e
 }
 
-func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	resp := make(map[string]string)
-	resp["message"] = "Hello World"
-
-	jsonResp, err := json.Marshal(resp)
-	if err != nil {
-		log.Fatalf("error handling JSON marshal. Err: %v", err)
+func (s *Server) HelloWorldHandler(c echo.Context) error {
+	resp := map[string]string{
+		"message": "Hello World",
 	}
 
-	_, _ = w.Write(jsonResp)
+	return c.JSON(http.StatusOK, resp)
 }
 
-func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
-	jsonResp, err := json.Marshal(s.db.Health())
-
-	if err != nil {
-		log.Fatalf("error handling JSON marshal. Err: %v", err)
-	}
-
-	_, _ = w.Write(jsonResp)
+func (s *Server) healthHandler(c echo.Context) error {
+	return c.JSON(http.StatusOK, s.db.Health())
 }
