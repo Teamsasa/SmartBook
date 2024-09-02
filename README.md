@@ -38,11 +38,6 @@ live reload the application
 make watch
 ```
 
-run the test suite
-```bash
-make test
-```
-
 clean up binary from the last build
 ```bash
 make clean

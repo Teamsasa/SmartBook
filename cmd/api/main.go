@@ -1,7 +1,7 @@
 package main
 
 import (
-	"aaa/internal/server"
+	"SmartBook/internal/server"
 	"fmt"
 )
 
