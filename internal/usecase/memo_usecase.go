@@ -3,6 +3,7 @@ package usecase
 import (
 	"SmartBook/internal/database"
 	"SmartBook/internal/model"
+	"fmt"
 	"time"
 )
 
@@ -87,6 +88,8 @@ func (u *MemoUseCase) GetMemo(memo *model.MemoRequest) (*model.Memo, error) {
 		if err := rows.Scan(&m.ID, &m.UserID, &m.ArticleURL, &m.Content, &m.CreatedAt, &m.UpdatedAt); err != nil {
 			return nil, err
 		}
+	} else {
+		return nil, fmt.Errorf("memo not found")
 	}
 
 	if err := rows.Err(); err != nil {
