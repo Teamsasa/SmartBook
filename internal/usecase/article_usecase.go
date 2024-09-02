@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"SmartBook/internal/model"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,7 +9,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"SmartBook/internal/model"
 )
 
 type ArticleUseCase struct {
@@ -44,7 +44,7 @@ func (u *ArticleUseCase) GetLatestArticles() ([]model.Article, error) {
 	}
 
 	sort.Slice(articles, func(i, j int) bool {
-		return articles[i].Time.After(articles[j].Time)
+		return articles[i].CreatedAt.After(articles[j].CreatedAt)
 	})
 
 	if len(articles) > 30 {
@@ -103,8 +103,8 @@ func (u *ArticleUseCase) getHackerNewsArticleByID(id int) (model.Article, error)
 		Title:      articleData.Title,
 		URL:        articleData.URL,
 		Score:      articleData.Score,
-		By:         articleData.By,
-		Time:       time.Unix(articleData.Time, 0),
+		Author:     articleData.By,
+		CreatedAt:  time.Unix(articleData.Time, 0),
 		Source:     "Hacker News",
 	}, nil
 }
@@ -142,8 +142,8 @@ func (u *ArticleUseCase) getDevToArticles() ([]model.Article, error) {
 			Title:      a.Title,
 			URL:        a.URL,
 			Score:      a.PositiveReactionsCount,
-			By:         a.User.Name,
-			Time:       publishedTime,
+			Author:     a.User.Name,
+			CreatedAt:  publishedTime,
 			Source:     "DEV.to",
 			Tags:       a.Tags,
 		}

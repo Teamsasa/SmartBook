@@ -23,8 +23,8 @@ type Article struct {
 	Title       string    `json:"title"`
 	URL         string    `json:"url"`
 	Score       int       `json:"score"`
-	By          string    `json:"by"`
-	Time        time.Time `json:"time"`
+	Author      string    `json:"author"`
+	CreatedAt   time.Time `json:"created_at"`
 	Description string    `json:"description"`
 	Source      string    `json:"source"`
 	Tags        []string  `json:"tags"`
