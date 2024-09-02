@@ -11,26 +11,34 @@ import (
 
 type ArticleHandler struct {
 	articleUseCase *usecase.ArticleUseCase
+	template       *template.Template
 }
 
 func NewArticleHandler(articleUseCase *usecase.ArticleUseCase) *ArticleHandler {
+	tmpl := template.Must(template.ParseFiles("templates/articles.html"))
 	return &ArticleHandler{
 		articleUseCase: articleUseCase,
+		template:       tmpl,
 	}
 }
 
-func (h *ArticleHandler) GetArticles(c echo.Context) error {
-	articles, err := h.articleUseCase.GetArticles()
+func (h *ArticleHandler) renderTemplate(c echo.Context, articles []usecase.Article, title string) error {
+	data := struct {
+		Title    string
+		Articles []usecase.Article
+	}{
+		Title:    title,
+		Articles: articles,
+	}
+	return h.template.Execute(c.Response().Writer, data)
+}
+
+func (h *ArticleHandler) GetLatestArticles(c echo.Context) error {
+	articles, err := h.articleUseCase.GetLatestArticles()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-
-	tmpl, err := template.ParseFiles("templates/articles.html")
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Template parsing error"})
-	}
-
-	return tmpl.Execute(c.Response().Writer, articles)
+	return h.renderTemplate(c, articles, "Latest Articles")
 }
 
 func (h *ArticleHandler) GetArticle(c echo.Context) error {
@@ -50,7 +58,7 @@ func (h *ArticleHandler) GetRecommendedArticles(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-	return c.JSON(http.StatusOK, articles)
+	return h.renderTemplate(c, articles, "Recommended Articles")
 }
 
 // func (h *ArticleHandler) GetArticleContent(c echo.Context) error {
