@@ -34,35 +34,35 @@ func NewArticleUseCase() *ArticleUseCase {
 }
 
 func (u *ArticleUseCase) GetLatestArticles() ([]Article, error) {
-    var articles []Article
-    var errors []error
+	var articles []Article
+	var errors []error
 
-    hackerNewsArticles, err := u.getHackerNewsArticles()
-    if err != nil {
-        errors = append(errors, fmt.Errorf("failed to get Hacker News articles: %w", err))
-    } else {
-        articles = append(articles, hackerNewsArticles...)
-    }
+	hackerNewsArticles, err := u.getHackerNewsArticles()
+	if err != nil {
+		errors = append(errors, fmt.Errorf("failed to get Hacker News articles: %w", err))
+	} else {
+		articles = append(articles, hackerNewsArticles...)
+	}
 
-    devToArticles, err := u.getDevToArticles()
-    if err != nil {
-        errors = append(errors, fmt.Errorf("failed to get DEV.to articles: %w", err))
-    } else {
-        articles = append(articles, devToArticles...)
-    }
+	devToArticles, err := u.getDevToArticles()
+	if err != nil {
+		errors = append(errors, fmt.Errorf("failed to get DEV.to articles: %w", err))
+	} else {
+		articles = append(articles, devToArticles...)
+	}
 
-    if len(articles) == 0 && len(errors) > 0 {
-        return nil, fmt.Errorf("failed to fetch articles: %v", errors)
-    }
+	if len(articles) == 0 && len(errors) > 0 {
+		return nil, fmt.Errorf("failed to fetch articles: %v", errors)
+	}
 
-    sort.Slice(articles, func(i, j int) bool {
-        return articles[i].Time.After(articles[j].Time)
-    })
+	sort.Slice(articles, func(i, j int) bool {
+		return articles[i].Time.After(articles[j].Time)
+	})
 
-    if len(articles) > 30 {
-        return articles[:30], nil
-    }
-    return articles, nil
+	if len(articles) > 30 {
+		return articles[:30], nil
+	}
+	return articles, nil
 }
 
 func (u *ArticleUseCase) getHackerNewsArticles() ([]Article, error) {

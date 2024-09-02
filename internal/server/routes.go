@@ -30,28 +30,15 @@ func (s *Server) RegisterRoutes() http.Handler {
 			// article.GET("/content", s.articleHandler.GetArticleContent)
 		}
 
-		// // メモ関連
-		// memo := api.Group("/memos")
-		// {
-		// 	memo.GET("/memos", s.getMemosHandler)
-		// 	memo.POST("/memos", s.createMemoHandler)
-		// 	memo.GET("/memos/:memoId", s.getMemoHandler)
-		// 	memo.PUT("/memos/:memoId", s.updateMemoHandler)
-		// 	memo.DELETE("/memos/:memoId", s.deleteMemoHandler)
-		// }
+		// 記事関連
+		memo := api.Group("/memo")
+		{
+			memo.GET("", s.memoHandler.GetMemoHandler)       // URLとuserIDに紐づいたメモを取得
+			memo.POST("", s.memoHandler.UpsertMemoHandler)   // メモを作成or更新
+			memo.DELETE("", s.memoHandler.DeleteMemoHandler) // メモを削除
+			memo.GET("/list", s.memoHandler.GetMemosHandler) // メモ一覧を取得
+		}
 	}
 
 	return e
 }
-
-// func (s *Server) HelloWorldHandler(c echo.Context) error {
-// 	resp := map[string]string{
-// 		"message": "Hello World",
-// 	}
-
-// 	return c.JSON(http.StatusOK, resp)
-// }
-
-// func (s *Server) healthHandler(c echo.Context) error {
-// 	return c.JSON(http.StatusOK, s.db.Health())
-// }
