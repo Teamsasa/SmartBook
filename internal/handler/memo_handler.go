@@ -32,7 +32,7 @@ func (h *MemoHandler) GetMemosHandler(c echo.Context) error {
 }
 
 func (h *MemoHandler) UpsertMemoHandler(c echo.Context) error {
-	userID := "" // tokenなりから取得
+	userID := "62236f88-4668-c711-2a61-50888a142952" // tokenなりから取得
 	articleID := c.Param("articleId")
 
 	if articleID == "" {

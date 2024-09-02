@@ -2,15 +2,6 @@ package model
 
 import "time"
 
-type Memo struct {
-	ID        int
-	UserID    string
-	ArticleID string
-	Content   string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
 type MemoRequest struct {
 	UserID    string
 	ArticleID string

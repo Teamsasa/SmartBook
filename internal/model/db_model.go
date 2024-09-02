@@ -23,7 +23,7 @@ type ArticleData struct {
 }
 
 type MemoData struct {
-	ID        string      `json:"id" gorm:"type:uuid;primaryKey"`
+	ID        string      `json:"id" gorm:"type:serial;primaryKey"`
 	UserID    string      `json:"user_id" gorm:"type:uuid;not null"`
 	ArticleID string      `json:"article_id" gorm:"type:uuid;not null"`
 	Content   string      `json:"content" gorm:"type:text;not null"`

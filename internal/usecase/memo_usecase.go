@@ -17,8 +17,8 @@ func NewMemoUseCase(db *gorm.DB) *MemoUseCase {
 	}
 }
 
-func (u *MemoUseCase) GetMemos(userID string) ([]model.Memo, error) {
-	var memos []model.Memo
+func (u *MemoUseCase) GetMemos(userID string) ([]model.MemoData, error) {
+	var memos []model.MemoData
 	result := u.db.Where("user_id = ?", userID).Find(&memos)
 	if result.Error != nil {
 		return nil, result.Error
@@ -30,15 +30,15 @@ func (u *MemoUseCase) GetMemos(userID string) ([]model.Memo, error) {
 // もしメモがすでに存在していたらupdate, そうでなければinsert
 func (u *MemoUseCase) UpsertMemo(req *model.MemoRequest) error {
 	// 既存のメモを取得
-	var memo model.Memo
-	result := u.db.Where("user_id = ? AND articleID = ?", req.UserID, req.ArticleID).First(&memo)
+	var memo model.MemoData
+	result := u.db.Where("user_id = ? AND article_id = ?", req.UserID, req.ArticleID).First(&memo)
 	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
 		return result.Error
 	}
 
 	// メモが存在しない場合は新規作成
 	if result.Error == gorm.ErrRecordNotFound {
-		memo = model.Memo{
+		memo = model.MemoData{
 			UserID:    req.UserID,
 			ArticleID: req.ArticleID,
 			Content:   req.Content,
@@ -60,9 +60,9 @@ func (u *MemoUseCase) UpsertMemo(req *model.MemoRequest) error {
 	return nil
 }
 
-func (u *MemoUseCase) GetMemo(req *model.MemoRequest) (*model.Memo, error) {
-	var memo model.Memo
-	result := u.db.Where("user_id = ? AND articleID = ?", req.UserID, req.ArticleID).First(&memo)
+func (u *MemoUseCase) GetMemo(req *model.MemoRequest) (*model.MemoData, error) {
+	var memo model.MemoData
+	result := u.db.Where("user_id = ? AND article_id = ?", req.UserID, req.ArticleID).First(&memo)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -71,7 +71,7 @@ func (u *MemoUseCase) GetMemo(req *model.MemoRequest) (*model.Memo, error) {
 }
 
 func (u *MemoUseCase) DeleteMemo(req *model.MemoRequest) error {
-	result := u.db.Where("user_id = ? AND articleID = ?", req.UserID, req.ArticleID).Delete(&model.Memo{})
+	result := u.db.Where("user_id = ? AND article_id = ?", req.UserID, req.ArticleID).Delete(&model.MemoData{})
 	if result.Error != nil {
 		return result.Error
 	}
