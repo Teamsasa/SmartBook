@@ -60,18 +60,12 @@ func (h *MemoHandler) UpsertMemoHandler(c echo.Context) error {
 }
 
 func (h *MemoHandler) GetMemoHandler(c echo.Context) error {
-	// tokenなりからユーザーIDを取得
+	userID := "" // tokenなりから取得
+	articleID := c.Param("articleId")
 
-	userID := ""
-
-	// article_urlをクエリパラメータから取得
-	req := &model.MemoRequest{}
-	articleURL := c.QueryParam("article_url")
-	req.ArticleURL = articleURL
-	req.UserID = userID
-
-	if req.ArticleURL == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "article_url is required"})
+	req := &model.MemoRequest{
+		UserID:    userID,
+		ArticleID: articleID,
 	}
 
 	memo, err := h.memoUseCase.GetMemo(req)

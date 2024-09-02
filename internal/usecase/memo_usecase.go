@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"SmartBook/internal/model"
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -76,28 +75,14 @@ func (u *MemoUseCase) UpsertMemo(req *model.MemoRequest) error {
 	return nil
 }
 
-func (u *MemoUseCase) GetMemo(memo *model.MemoRequest) (*model.Memo, error) {
-	query := "SELECT ID, UserID, ArticleURL, Content, CreatedAt, UpdatedAt FROM memos WHERE UserID = $1 AND ArticleURL = $2"
-	rows, err := u.db.Query(query, memo.UserID, memo.ArticleURL)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var m model.Memo
-	if rows.Next() {
-		if err := rows.Scan(&m.ID, &m.UserID, &m.ArticleURL, &m.Content, &m.CreatedAt, &m.UpdatedAt); err != nil {
-			return nil, err
-		}
-	} else {
-		return nil, fmt.Errorf("memo not found")
+func (u *MemoUseCase) GetMemo(req *model.MemoRequest) (*model.Memo, error) {
+	var memo model.Memo
+	result := u.db.Where("user_id = ? AND articleID = ?", req.UserID, req.ArticleID).First(&memo)
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return &m, nil
+	return &memo, nil
 }
 
 func (u *MemoUseCase) DeleteMemo(memo *model.MemoRequest) error {
