@@ -31,7 +31,7 @@ func (h *MemoHandler) GetMemosHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, memos)
 }
 
-func (h *MemoHandler) CreateMemoHandler(c echo.Context) error {
+func (h *MemoHandler) UpsertMemoHandler(c echo.Context) error {
 	// tokenなりからユーザーIDを取得
 
 	userID := ""
@@ -49,7 +49,7 @@ func (h *MemoHandler) CreateMemoHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "article_url and content are required"})
 	}
 
-	if err := h.memoUseCase.CreateMemo(req); err != nil {
+	if err := h.memoUseCase.UpsertMemo(req); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
