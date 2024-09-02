@@ -10,26 +10,32 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 
 	"SmartBook/internal/database"
+	"SmartBook/internal/handler"
+	"SmartBook/internal/usecase"
 )
 
 type Server struct {
-	port int
-
-	db database.Service
+	port           int
+	db             database.Service
+	articleHandler *handler.ArticleHandler
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	NewServer := &Server{
-		port: port,
+	db := database.New()
+	articleUseCase := usecase.NewArticleUseCase()
+	articleHandler := handler.NewArticleHandler(articleUseCase)
 
-		db: database.New(),
+	newServer := &Server{
+		port:           port,
+		db:             db,
+		articleHandler: articleHandler,
 	}
 
 	// Declare Server config
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
+		Addr:         fmt.Sprintf(":%d", newServer.port),
+		Handler:      newServer.RegisterRoutes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,

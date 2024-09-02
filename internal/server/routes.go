@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"SmartBook/internal/handler"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -24,10 +25,12 @@ func (s *Server) RegisterRoutes() http.Handler {
 		// 記事関連
 		article := api.Group("/articles")
 		{
-			article.GET("/articles", s.getArticlesHandler)
-			article.GET("/articles/:articleId", s.getArticleHandler)
-			article.GET("/articles/recommended", s.getRecommendedArticlesHandler)
+			article.GET("", s.articleHandler.GetArticles)
+			article.GET("/:articleId", s.articleHandler.GetArticle)
+			article.GET("/recommended", s.articleHandler.GetRecommendedArticles)
+			article.GET("/content", s.articleHandler.GetArticleContent)
 		}
+
 
 		// メモ関連
 		memo := api.Group("/memos")
