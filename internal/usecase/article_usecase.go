@@ -98,14 +98,13 @@ func (u *ArticleUseCase) getHackerNewsArticleByID(id int) (model.Article, error)
 	}
 
 	return model.Article{
-		ID:         u.generateUniqueID("hn", articleData.ID),
-		ExternalID: fmt.Sprintf("hn_%d", articleData.ID),
-		Title:      articleData.Title,
-		URL:        articleData.URL,
-		Score:      articleData.Score,
-		Author:     articleData.By,
-		CreatedAt:  time.Unix(articleData.Time, 0),
-		Source:     "Hacker News",
+		ID:        fmt.Sprintf("hn_%d", articleData.ID),
+		Title:     articleData.Title,
+		URL:       articleData.URL,
+		Score:     articleData.Score,
+		Author:    articleData.By,
+		CreatedAt: time.Unix(articleData.Time, 0),
+		Source:    "Hacker News",
 	}, nil
 }
 
@@ -137,24 +136,19 @@ func (u *ArticleUseCase) getDevToArticles() ([]model.Article, error) {
 	for _, a := range devToArticles {
 		publishedTime, _ := time.Parse(time.RFC3339, a.PublishedAt)
 		article := model.Article{
-			ID:         u.generateUniqueID("dev", a.ID),
-			ExternalID: fmt.Sprintf("dev_%d", a.ID),
-			Title:      a.Title,
-			URL:        a.URL,
-			Score:      a.PositiveReactionsCount,
-			Author:     a.User.Name,
-			CreatedAt:  publishedTime,
-			Source:     "DEV.to",
-			Tags:       a.Tags,
+			ID:        fmt.Sprintf("dev_%d", a.ID),
+			Title:     a.Title,
+			URL:       a.URL,
+			Score:     a.PositiveReactionsCount,
+			Author:    a.User.Name,
+			CreatedAt: publishedTime,
+			Source:    "DEV.to",
+			Tags:      a.Tags,
 		}
 		articles = append(articles, article)
 	}
 
 	return articles, nil
-}
-
-func (u *ArticleUseCase) generateUniqueID(source string, externalID int) string {
-	return fmt.Sprintf("%s_%d", source, externalID)
 }
 
 func (u *ArticleUseCase) GetRecommendedArticles(userInterests []string) ([]model.Article, error) {
@@ -213,22 +207,6 @@ func (u *ArticleUseCase) GetArticleByID(id string) (*model.Article, error) {
 
 	for _, article := range articles {
 		if article.ID == id {
-			return &article, nil
-		}
-	}
-
-	return nil, errors.New("article not found")
-}
-
-// オプション: 外部IDでも記事を取得できるようにするメソッド
-func (u *ArticleUseCase) GetArticleByExternalID(externalID string) (*model.Article, error) {
-	articles, err := u.GetLatestArticles()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, article := range articles {
-		if article.ExternalID == externalID {
 			return &article, nil
 		}
 	}
