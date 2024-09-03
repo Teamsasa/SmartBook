@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"SmartBook/internal/usecase"
 	"SmartBook/internal/model"
+	"SmartBook/internal/usecase"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -53,12 +53,12 @@ func (h *ArticleHandler) GetRecommendedArticles(c echo.Context) error {
 	// 	return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch user information"})
 	// }
 	user := &model.User{
-		ID:        "1",
-		Interests: []string{"Network", "Go"},
-		Likes:    []string{"Go"},
+		ID:          "1",
+		Interests:   []string{"Network", "Go"},
+		Likes:       []string{"Go"},
 		RecentViews: []string{"1", "2"},
 	}
-	
+
 	// ユーザーの興味が設定されていない場合のエラーハンドリング
 	if len(user.Interests) == 0 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "User interests are not set"})
