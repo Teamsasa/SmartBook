@@ -13,7 +13,9 @@ import (
 
 	"SmartBook/internal/cache"
 	"SmartBook/internal/database"
+	"SmartBook/internal/firebase"
 	"SmartBook/internal/handler"
+	"SmartBook/internal/repository"
 	"SmartBook/internal/usecase"
 )
 
@@ -23,11 +25,13 @@ type Server struct {
 	articleHandler *handler.ArticleHandler
 	memoHandler    *handler.MemoHandler
 	cache          cache.Cache
+	authHandler    *handler.AuthHandler
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	db := database.NewDB()
+	firebaseClient := firebase.NewClient()
 
 	// HTTP クライアントを作成
 	httpClient := &http.Client{
@@ -43,6 +47,9 @@ func NewServer() *http.Server {
 	articleHandler := handler.NewArticleHandler(articleUseCase)
 	memoUseCase := usecase.NewMemoUseCase(db)
 	memoHandler := handler.NewMemoHandler(memoUseCase)
+	authRepository, _ := repository.NewAuthRepository(db, firebaseClient)
+	authUseCase := usecase.NewAuthUsecase(authRepository)
+	authHandler := handler.NewAuthHandler(authUseCase)
 
 	newServer := &Server{
 		port:           port,
@@ -50,6 +57,7 @@ func NewServer() *http.Server {
 		articleHandler: articleHandler,
 		memoHandler:    memoHandler,
 		cache:          cacheInstance,
+		authHandler:    authHandler,
 	}
 
 	// Declare Server config

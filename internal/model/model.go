@@ -18,3 +18,9 @@ type Article struct {
 	Source    string    `json:"source"`
 	Tags      []string  `json:"tags"`
 }
+
+type InputUser struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}

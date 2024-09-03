@@ -25,6 +25,9 @@ tmp/
 # .env file
 .env
 
+# firebase secret key
+key.json
+
 # Project build
 main
 *templ.go

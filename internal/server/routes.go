@@ -15,11 +15,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 	api := e.Group("/api")
 	{
 		// // ユーザー関連
-		// user := api.Group("/users")
-		// {
-		// 	user.GET("/users/:userId", s.getUserHandler)
-		// 	user.PUT("/users/:userId", s.updateUserHandler)
-		// }
+		user := api.Group("/users")
+		{
+			user.POST("/signup", s.authHandler.SignUp)
+			// 	user.PUT("/users/:userId", s.updateUserHandler)
+		}
 
 		// 記事関連
 		article := api.Group("/articles")
