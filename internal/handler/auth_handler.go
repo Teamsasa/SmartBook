@@ -36,3 +36,17 @@ func (h *AuthHandler) SignUp(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res)
 }
+
+func (h *AuthHandler) SignIn(c echo.Context) error {
+	var input model.InputUser
+	if err := c.Bind(&input); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	res, err := h.authUseCase.SignIn(c, input)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, res)
+}

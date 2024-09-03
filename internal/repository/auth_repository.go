@@ -13,6 +13,7 @@ import (
 type IAuthRepository interface {
 	CreateUser(c echo.Context, user model.InputUser) (string, error)
 	InsertUser(c echo.Context, userId string, user model.InputUser) (model.User, error)
+	GetUser(c echo.Context, user model.InputUser) (model.User, error)
 }
 
 type AuthRepository struct {
@@ -54,4 +55,13 @@ func (r *AuthRepository) InsertUser(c echo.Context, userId string, user model.In
 	}
 
 	return newUser, nil
+}
+
+func (r *AuthRepository) GetUser(c echo.Context, user model.InputUser) (model.User, error) {
+	userRecord := model.User{}
+	if err := r.db.Where("email = ?", user.Email).First(&userRecord).Error; err != nil {
+		return model.User{}, err
+	}
+
+	return userRecord, nil
 }

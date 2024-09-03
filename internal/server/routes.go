@@ -18,7 +18,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		user := api.Group("/users")
 		{
 			user.POST("/signup", s.authHandler.SignUp)
-			// 	user.PUT("/users/:userId", s.updateUserHandler)
+			user.POST("/signin", s.authHandler.SignIn)
 		}
 
 		// 記事関連
