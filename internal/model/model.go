@@ -9,14 +9,12 @@ type MemoRequest struct {
 }
 
 type Article struct {
-	ID          string    `json:"id"`
-	ExternalID  string    `json:"external_id"`
-	Title       string    `json:"title"`
-	URL         string    `json:"url"`
-	Score       int       `json:"score"`
-	Author      string    `json:"author"`
-	CreatedAt   time.Time `json:"created_at"`
-	Description string    `json:"description"`
-	Source      string    `json:"source"`
-	Tags        []string  `json:"tags"`
+	ID        string    `json:"id"`
+	Title     string    `json:"title"`
+	URL       string    `json:"url"`
+	Score     int       `json:"score"`
+	Author    string    `json:"author"`
+	CreatedAt time.Time `json:"created_at"`
+	Source    string    `json:"source"`
+	Tags      []string  `json:"tags"`
 }
