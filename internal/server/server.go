@@ -39,7 +39,7 @@ func NewServer() *http.Server {
 	// 1時間ごとに期限切れのアイテムを削除
 	go cacheInstance.StartCleanup(1 * time.Hour)
 
-	articleUseCase := usecase.NewArticleUseCase(httpClient, cacheInstance)
+	articleUseCase, _ := usecase.NewArticleUseCase(httpClient, cacheInstance)
 	articleHandler := handler.NewArticleHandler(articleUseCase)
 	memoUseCase := usecase.NewMemoUseCase(db)
 	memoHandler := handler.NewMemoHandler(memoUseCase)

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
-	"strings"
 	"sync"
 	"time"
 
@@ -28,18 +27,27 @@ type ArticleUseCase struct {
 	hackerNewsFetcher ArticleFetcher
 	devToFetcher      ArticleFetcher
 	cache             Cache
+	geminiClient      *GeminiClient
 }
 
-func NewArticleUseCase(client *http.Client, cache Cache) *ArticleUseCase {
+func NewArticleUseCase(client *http.Client, cache Cache) (*ArticleUseCase, error) {
 	if client == nil {
 		client = &http.Client{Timeout: 10 * time.Second}
 	}
+
+	geminiClient, err := NewGeminiClient()
+	if err != nil {
+		fmt.Println("🔴failed to create Gemini client: %w", err)
+		return nil, err
+	}
+
 	return &ArticleUseCase{
 		client:            client,
 		hackerNewsFetcher: &HackerNewsFetcher{client: client},
 		devToFetcher:      &DevToFetcher{client: client},
 		cache:             cache,
-	}
+		geminiClient:      geminiClient,
+	}, nil
 }
 
 func (u *ArticleUseCase) GetAllArticles(ctx context.Context) ([]model.Article, error) {
@@ -89,47 +97,6 @@ func (u *ArticleUseCase) GetLatestArticles(ctx context.Context) ([]model.Article
 		return allArticles[:30], nil
 	}
 	return allArticles, nil
-}
-
-func (u *ArticleUseCase) GetRecommendedArticles(ctx context.Context, userInterests []string) ([]model.Article, error) {
-	allArticles, err := u.GetAllArticles(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	scoredArticles := make([]struct {
-		Article model.Article
-		Score   float64
-	}, len(allArticles))
-
-	for i, article := range allArticles {
-		score := float64(article.Score)
-		for _, interest := range userInterests {
-			if strings.Contains(strings.ToLower(article.Title), strings.ToLower(interest)) {
-				score += 100
-			}
-			for _, tag := range article.Tags {
-				if strings.EqualFold(tag, interest) {
-					score += 50
-				}
-			}
-		}
-		scoredArticles[i] = struct {
-			Article model.Article
-			Score   float64
-		}{Article: article, Score: score}
-	}
-
-	sort.Slice(scoredArticles, func(i, j int) bool {
-		return scoredArticles[i].Score > scoredArticles[j].Score
-	})
-
-	recommendedArticles := make([]model.Article, 0, 30)
-	for i := 0; i < 30 && i < len(scoredArticles); i++ {
-		recommendedArticles = append(recommendedArticles, scoredArticles[i].Article)
-	}
-
-	return recommendedArticles, nil
 }
 
 func (u *ArticleUseCase) GetArticleByID(ctx context.Context, id string) (*model.Article, error) {

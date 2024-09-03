@@ -2,19 +2,22 @@ package handler
 
 import (
 	"SmartBook/internal/usecase"
+	"SmartBook/internal/model"
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
 
 type ArticleHandler struct {
 	articleUseCase *usecase.ArticleUseCase
+	// userUseCase    *usecase.UserUseCase  // ユーザー情報を取得するためのユースケース(masayamaが多分作ってくれる)
 }
 
+// func NewArticleHandler(articleUseCase *usecase.ArticleUseCase, userUseCase *usecase.UserUseCase) *ArticleHandler {
 func NewArticleHandler(articleUseCase *usecase.ArticleUseCase) *ArticleHandler {
 	return &ArticleHandler{
 		articleUseCase: articleUseCase,
+		// userUseCase:    userUseCase,
 	}
 }
 
@@ -39,16 +42,34 @@ func (h *ArticleHandler) GetArticle(c echo.Context) error {
 
 func (h *ArticleHandler) GetRecommendedArticles(c echo.Context) error {
 	ctx := c.Request().Context()
-	interests := c.QueryParam("interests")
-	if interests == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Interests parameter is required"})
-	}
-	userInterests := strings.Split(interests, ",")
 
-	articles, err := h.articleUseCase.GetRecommendedArticles(ctx, userInterests)
+	// 認証されたユーザーのIDを取得
+	// 注意: この部分は実際の認証システムに合わせて実装する必要があります
+	// userID := c.Get("user_id").(string) // 例: JWTミドルウェアでセットされたユーザーID
+
+	// データベースからユーザー情報を取得
+	// user, err := h.userUseCase.GetUserByID(ctx, userID)
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch user information"})
+	// }
+	user := &model.User{
+		ID:        "1",
+		Interests: []string{"Network", "Go"},
+		Likes:    []string{"Go"},
+		RecentViews: []string{"1", "2"},
+	}
+	
+	// ユーザーの興味が設定されていない場合のエラーハンドリング
+	if len(user.Interests) == 0 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "User interests are not set"})
+	}
+
+	// 推奨記事を取得
+	articles, err := h.articleUseCase.GetRecommendedArticles(ctx, user)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch recommended articles"})
 	}
+
 	return c.JSON(http.StatusOK, articles)
 }
 

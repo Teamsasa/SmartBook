@@ -5,12 +5,15 @@ import (
 )
 
 type User struct {
-	ID        string     `json:"id" gorm:"type:uuid;primaryKey"`
-	Name      string     `json:"name" gorm:"type:varchar(255);not null"`
-	Email     string     `json:"email" gorm:"type:varchar(255);unique;not null"`
-	CreatedAt time.Time  `json:"created_at" gorm:"not null"`
-	UpdatedAt time.Time  `json:"updated_at" gorm:"not null"`
-	Memos     []MemoData `json:"memos" gorm:"foreignKey:UserID"`
+	ID          string     `json:"id" gorm:"type:uuid;primaryKey"`
+	Name        string     `json:"name" gorm:"type:varchar(255);not null"`
+	Email       string     `json:"email" gorm:"type:varchar(255);unique;not null"`
+	CreatedAt   time.Time  `json:"created_at" gorm:"not null"`
+	UpdatedAt   time.Time  `json:"updated_at" gorm:"not null"`
+	Memos       []MemoData `json:"memos" gorm:"foreignKey:UserID"`
+	Interests   []string   `json:"interests" gorm:"type:varchar(255)[]"`
+	RecentViews []string   `json:"recent_views" gorm:"type:varchar(255)[]"`
+	Likes       []string   `json:"likes" gorm:"type:varchar(255)[]"`
 }
 
 type ArticleData struct {
