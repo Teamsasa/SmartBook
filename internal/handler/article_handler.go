@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"SmartBook/internal/model"
 	"SmartBook/internal/usecase"
-	"html/template"
 	"net/http"
 	"strings"
 
@@ -12,26 +10,12 @@ import (
 
 type ArticleHandler struct {
 	articleUseCase *usecase.ArticleUseCase
-	template       *template.Template
 }
 
 func NewArticleHandler(articleUseCase *usecase.ArticleUseCase) *ArticleHandler {
-	tmpl := template.Must(template.ParseFiles("templates/articles.html"))
 	return &ArticleHandler{
 		articleUseCase: articleUseCase,
-		template:       tmpl,
 	}
-}
-
-func (h *ArticleHandler) renderTemplate(c echo.Context, articles []model.Article, title string) error {
-	data := struct {
-		Title    string
-		Articles []model.Article
-	}{
-		Title:    title,
-		Articles: articles,
-	}
-	return h.template.Execute(c.Response().Writer, data)
 }
 
 func (h *ArticleHandler) GetLatestArticles(c echo.Context) error {
@@ -39,7 +23,7 @@ func (h *ArticleHandler) GetLatestArticles(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-	return h.renderTemplate(c, articles, "Latest Articles")
+	return c.JSON(http.StatusOK, articles)
 }
 
 func (h *ArticleHandler) GetArticle(c echo.Context) error {
@@ -59,17 +43,5 @@ func (h *ArticleHandler) GetRecommendedArticles(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-	return h.renderTemplate(c, articles, "Recommended Articles")
+	return c.JSON(http.StatusOK, articles)
 }
-
-// func (h *ArticleHandler) GetArticleContent(c echo.Context) error {
-// 	url := c.QueryParam("url")
-// 	if url == "" {
-// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "URL parameter is required"})
-// 	}
-// 	content, err := h.articleUseCase.GetArticleContent(url)
-// 	if err != nil {
-// 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-// 	}
-// 	return c.HTML(http.StatusOK, content)
-// }
