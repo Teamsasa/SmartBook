@@ -33,8 +33,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 		// メモ関連
 		memo := api.Group("/memo")
 		{
+			memo.POST("/", s.memoHandler.CreateMemoHandler)             // メモを作成
 			memo.GET("/:articleId", s.memoHandler.GetMemoHandler)       // メモを取得
-			memo.POST("/:articleId", s.memoHandler.UpsertMemoHandler)   // メモを作成or更新
+			memo.PUT("/:articleId", s.memoHandler.UpdateMemoHandler)    // メモを更新
 			memo.DELETE("/:articleId", s.memoHandler.DeleteMemoHandler) // メモを削除
 			memo.GET("/list", s.memoHandler.GetMemosHandler)            // メモ一覧を取得
 		}
