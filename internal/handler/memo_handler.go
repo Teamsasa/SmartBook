@@ -4,6 +4,7 @@ import (
 	"SmartBook/internal/model"
 	"SmartBook/internal/usecase"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,9 +20,7 @@ func NewMemoHandler(memoUseCase *usecase.MemoUseCase) *MemoHandler {
 }
 
 func (h *MemoHandler) GetMemosHandler(c echo.Context) error {
-	// tokenなりからユーザーIDを取得
-
-	userID := ""
+	userID := "0440acdf-9ff3-65ad-51fb-55e95bb230f9" // tokenなりから取得
 
 	memos, err := h.memoUseCase.GetMemos(userID)
 	if err != nil {
@@ -31,8 +30,50 @@ func (h *MemoHandler) GetMemosHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, memos)
 }
 
-func (h *MemoHandler) UpsertMemoHandler(c echo.Context) error {
-	userID := "62236f88-4668-c711-2a61-50888a142952" // tokenなりから取得
+func (h *MemoHandler) CreateMemoHandler(c echo.Context) error {
+	userID := "0440acdf-9ff3-65ad-51fb-55e95bb230f9" // tokenなりから取得
+
+	type CreateMemoRequest struct {
+		ArticleData *model.ArticleData `json:"article"`
+		MemoContent string             `json:"content"`
+	}
+
+	var req CreateMemoRequest
+
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	if req.MemoContent == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "content is required"})
+	}
+
+	articleCreateReq := &model.ArticleData{
+		ID:        req.ArticleData.ID,
+		URL:       req.ArticleData.URL,
+		Title:     req.ArticleData.Title,
+		Author:    req.ArticleData.Author,
+		CreatedAt: time.Now(),
+	}
+
+	memoCreateReq := &model.MemoData{
+		UserID:    userID,
+		ArticleID: articleCreateReq.ID,
+		Content:   req.MemoContent,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	if err := h.memoUseCase.CreateMemo(memoCreateReq, articleCreateReq); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]string{"message": "memo created"})
+}
+
+func (h *MemoHandler) UpdateMemoHandler(c echo.Context) error {
+
+	userID := "0440acdf-9ff3-65ad-51fb-55e95bb230f9" // tokenなりから取得
 	articleID := c.Param("articleId")
 
 	if articleID == "" {
@@ -53,15 +94,15 @@ func (h *MemoHandler) UpsertMemoHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "content is required"})
 	}
 
-	if err := h.memoUseCase.UpsertMemo(req); err != nil {
+	if err := h.memoUseCase.UpdateMemo(req); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{"message": "memo created"})
+	return c.JSON(http.StatusOK, map[string]string{"message": "memo updated"})
 }
 
 func (h *MemoHandler) GetMemoHandler(c echo.Context) error {
-	userID := "" // tokenなりから取得
+	userID := "0440acdf-9ff3-65ad-51fb-55e95bb230f9" // tokenなりから取得
 	articleID := c.Param("articleId")
 
 	if articleID == "" {
@@ -83,7 +124,7 @@ func (h *MemoHandler) GetMemoHandler(c echo.Context) error {
 }
 
 func (h *MemoHandler) DeleteMemoHandler(c echo.Context) error {
-	userID := "" // tokenなりから取得
+	userID := "0440acdf-9ff3-65ad-51fb-55e95bb230f9" // tokenなりから取得
 	articleID := c.Param("articleId")
 
 	if articleID == "" {

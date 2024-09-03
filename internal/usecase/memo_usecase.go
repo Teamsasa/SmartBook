@@ -27,34 +27,41 @@ func (u *MemoUseCase) GetMemos(userID string) ([]model.MemoData, error) {
 	return memos, nil
 }
 
-// もしメモがすでに存在していたらupdate, そうでなければinsert
-func (u *MemoUseCase) UpsertMemo(req *model.MemoRequest) error {
-	// 既存のメモを取得
-	var memo model.MemoData
-	result := u.db.Where("user_id = ? AND article_id = ?", req.UserID, req.ArticleID).First(&memo)
-	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+// articleとmemoを作成する。どちらが失敗したらロールバックする。
+func (u *MemoUseCase) CreateMemo(memoCreateReq *model.MemoData, articleCreateReq *model.ArticleData) error {
+	tx := u.db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	result := tx.Create(articleCreateReq)
+	if result.Error != nil {
+		tx.Rollback()
 		return result.Error
 	}
 
-	// メモが存在しない場合は新規作成
-	if result.Error == gorm.ErrRecordNotFound {
-		memo = model.MemoData{
-			UserID:    req.UserID,
-			ArticleID: req.ArticleID,
-			Content:   req.Content,
-			UpdatedAt: time.Now(),
-			CreatedAt: time.Now(),
-		}
-		result = u.db.Create(&memo)
-		if result.Error != nil {
-			return result.Error
-		}
-	} else {
-		// メモが存在する場合は更新
-		result = u.db.Model(&memo).Update("content", req.Content)
-		if result.Error != nil {
-			return result.Error
-		}
+	result = tx.Create(memoCreateReq)
+	if result.Error != nil {
+		tx.Rollback()
+		return result.Error
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *MemoUseCase) UpdateMemo(req *model.MemoRequest) error {
+	memo := model.MemoData{
+		Content:   req.Content,
+		UpdatedAt: time.Now(),
+	}
+
+	result := u.db.Where("user_id = ? AND article_id = ?", req.UserID, req.ArticleID).Updates(&memo)
+	if result.Error != nil {
+		return result.Error
 	}
 
 	return nil
