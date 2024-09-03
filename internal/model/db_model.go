@@ -5,7 +5,7 @@ import (
 )
 
 type User struct {
-	ID          string     `json:"id" gorm:"type:uuid;primaryKey"`
+	ID          string     `json:"id" gorm:"type:varchar(255);primaryKey"`
 	Name        string     `json:"name" gorm:"type:varchar(255);not null"`
 	Email       string     `json:"email" gorm:"type:varchar(255);unique;not null"`
 	CreatedAt   time.Time  `json:"created_at" gorm:"not null"`
@@ -27,7 +27,7 @@ type ArticleData struct {
 
 type MemoData struct {
 	ID        int         `json:"id" gorm:"primaryKey;autoIncrement"`
-	UserID    string      `json:"user_id" gorm:"type:uuid;not null"`
+	UserID    string      `json:"user_id" gorm:"type:varchar(255);not null"`
 	ArticleID int         `json:"article_id" gorm:"not null"`
 	Content   string      `json:"content" gorm:"type:text;not null"`
 	CreatedAt time.Time   `json:"created_at" gorm:"not null"`
