@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"SmartBook/internal/usecase"
 	"SmartBook/internal/model"
+	"SmartBook/internal/usecase"
 	"html/template"
 	"net/http"
 	"strings"

@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"gorm.io/gorm"
+
 	_ "github.com/joho/godotenv/autoload"
 
 	"SmartBook/internal/database"
@@ -16,14 +18,14 @@ import (
 
 type Server struct {
 	port           int
-	db             database.Service
+	db             *gorm.DB
 	articleHandler *handler.ArticleHandler
 	memoHandler    *handler.MemoHandler
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	db := database.New()
+	db := database.NewDB()
 	articleUseCase := usecase.NewArticleUseCase()
 	articleHandler := handler.NewArticleHandler(articleUseCase)
 	memoUseCase := usecase.NewMemoUseCase(db)

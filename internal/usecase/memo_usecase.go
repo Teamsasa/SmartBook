@@ -1,109 +1,79 @@
 package usecase
 
 import (
-	"SmartBook/internal/database"
 	"SmartBook/internal/model"
-	"fmt"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type MemoUseCase struct {
-	db database.Service
+	db *gorm.DB
 }
 
-func NewMemoUseCase(db database.Service) *MemoUseCase {
+func NewMemoUseCase(db *gorm.DB) *MemoUseCase {
 	return &MemoUseCase{
 		db: db,
 	}
 }
 
-func (u *MemoUseCase) GetMemos(userID string) ([]model.Memo, error) {
-	// DBからユーザーIDを元にメモを取得
-	query := "SELECT ID, UserID, ArticleURL, Content, CreatedAt, UpdatedAt FROM memos WHERE UserID = $1"
-	rows, err := u.db.Query(query, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var memos []model.Memo
-	for rows.Next() {
-		var memo model.Memo
-		if err := rows.Scan(&memo.ID, &memo.UserID, &memo.ArticleURL, &memo.Content, &memo.CreatedAt, &memo.UpdatedAt); err != nil {
-			return nil, err
-		}
-		memos = append(memos, memo)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
+func (u *MemoUseCase) GetMemos(userID string) ([]model.MemoData, error) {
+	var memos []model.MemoData
+	result := u.db.Where("user_id = ?", userID).Find(&memos)
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
 	return memos, nil
 }
 
 // もしメモがすでに存在していたらupdate, そうでなければinsert
-func (u *MemoUseCase) UpsertMemo(memo *model.MemoRequest) error {
-
-	query := "SELECT ID FROM memos WHERE UserID = $1 AND ArticleURL = $2"
-	rows, err := u.db.Query(query, memo.UserID, memo.ArticleURL)
-	if err != nil {
-		return err
+func (u *MemoUseCase) UpsertMemo(req *model.MemoRequest) error {
+	// 既存のメモを取得
+	var memo model.MemoData
+	result := u.db.Where("user_id = ? AND article_id = ?", req.UserID, req.ArticleID).First(&memo)
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		return result.Error
 	}
-	defer rows.Close()
 
-	if rows.Next() {
-		// update
-		query = "UPDATE memos SET Content = $1, UpdatedAt = $2 WHERE UserID = $3 AND ArticleURL = $4"
-		_, err := u.db.Exec(query, memo.Content, time.Now(), memo.UserID, memo.ArticleURL)
-		if err != nil {
-			return err
+	// メモが存在しない場合は新規作成
+	if result.Error == gorm.ErrRecordNotFound {
+		memo = model.MemoData{
+			UserID:    req.UserID,
+			ArticleID: req.ArticleID,
+			Content:   req.Content,
+			UpdatedAt: time.Now(),
+			CreatedAt: time.Now(),
+		}
+		result = u.db.Create(&memo)
+		if result.Error != nil {
+			return result.Error
 		}
 	} else {
-		// insert
-		query = "INSERT INTO memos (UserID, ArticleURL, Content, CreatedAt, UpdatedAt) VALUES ($1, $2, $3, $4, $5)"
-		_, err := u.db.Exec(query, memo.UserID, memo.ArticleURL, memo.Content, time.Now(), time.Now())
-		if err != nil {
-			return err
+		// メモが存在する場合は更新
+		result = u.db.Model(&memo).Update("content", req.Content)
+		if result.Error != nil {
+			return result.Error
 		}
-	}
-
-	if err := rows.Err(); err != nil {
-		return err
 	}
 
 	return nil
 }
 
-func (u *MemoUseCase) GetMemo(memo *model.MemoRequest) (*model.Memo, error) {
-	query := "SELECT ID, UserID, ArticleURL, Content, CreatedAt, UpdatedAt FROM memos WHERE UserID = $1 AND ArticleURL = $2"
-	rows, err := u.db.Query(query, memo.UserID, memo.ArticleURL)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var m model.Memo
-	if rows.Next() {
-		if err := rows.Scan(&m.ID, &m.UserID, &m.ArticleURL, &m.Content, &m.CreatedAt, &m.UpdatedAt); err != nil {
-			return nil, err
-		}
-	} else {
-		return nil, fmt.Errorf("memo not found")
+func (u *MemoUseCase) GetMemo(req *model.MemoRequest) (*model.MemoData, error) {
+	var memo model.MemoData
+	result := u.db.Where("user_id = ? AND article_id = ?", req.UserID, req.ArticleID).First(&memo)
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return &m, nil
+	return &memo, nil
 }
 
-func (u *MemoUseCase) DeleteMemo(memo *model.MemoRequest) error {
-	query := "DELETE FROM memos WHERE UserID = $1 AND ArticleURL = $2"
-	_, err := u.db.Exec(query, memo.UserID, memo.ArticleURL)
-	if err != nil {
-		return err
+func (u *MemoUseCase) DeleteMemo(req *model.MemoRequest) error {
+	result := u.db.Where("user_id = ? AND article_id = ?", req.UserID, req.ArticleID).Delete(&model.MemoData{})
+	if result.Error != nil {
+		return result.Error
 	}
 
 	return nil

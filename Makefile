@@ -13,6 +13,11 @@ build:
 run:
 	@go run cmd/api/main.go
 
+# Run migrations
+migrate:
+	@echo "Running migrations..."
+	@./migrate.sh
+
 
 # Create DB container
 docker-run:
@@ -57,4 +62,4 @@ watch:
         fi
 
 
-.PHONY: all build run clean watch
+.PHONY: all build run clean watch migrate

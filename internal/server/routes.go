@@ -30,13 +30,13 @@ func (s *Server) RegisterRoutes() http.Handler {
 			// article.GET("/content", s.articleHandler.GetArticleContent)
 		}
 
-		// 記事関連
+		// メモ関連
 		memo := api.Group("/memo")
 		{
-			memo.GET("", s.memoHandler.GetMemoHandler)       // URLとuserIDに紐づいたメモを取得
-			memo.POST("", s.memoHandler.UpsertMemoHandler)   // メモを作成or更新
-			memo.DELETE("", s.memoHandler.DeleteMemoHandler) // メモを削除
-			memo.GET("/list", s.memoHandler.GetMemosHandler) // メモ一覧を取得
+			memo.GET("/:articleId", s.memoHandler.GetMemoHandler)       // メモを取得
+			memo.POST("/:articleId", s.memoHandler.UpsertMemoHandler)   // メモを作成or更新
+			memo.DELETE("/:articleId", s.memoHandler.DeleteMemoHandler) // メモを削除
+			memo.GET("/list", s.memoHandler.GetMemosHandler)            // メモ一覧を取得
 		}
 	}
 
