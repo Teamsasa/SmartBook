@@ -7,11 +7,20 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
 	"golang.org/x/sync/errgroup"
 )
+
+type HackerNewsFetcher struct {
+	client *http.Client
+}
+
+type DevToFetcher struct {
+	client *http.Client
+}
 
 type ArticleFetcher interface {
 	FetchArticles(ctx context.Context, limit int) ([]model.Article, error)
@@ -52,6 +61,7 @@ func NewArticleUseCase(client *http.Client, cache Cache) (*ArticleUseCase, error
 
 func (u *ArticleUseCase) GetAllArticles(ctx context.Context) ([]model.Article, error) {
 	if cachedArticles, found := u.cache.Get("all_articles"); found {
+		fmt.Println("🟢 Cache hit: all_articles")
 		return cachedArticles.([]model.Article), nil
 	}
 
@@ -112,10 +122,6 @@ func (u *ArticleUseCase) GetArticleByID(ctx context.Context, id string) (*model.
 	}
 
 	return nil, fmt.Errorf("article not found: %s", id)
-}
-
-type HackerNewsFetcher struct {
-	client *http.Client
 }
 
 func (f *HackerNewsFetcher) FetchArticles(ctx context.Context, limit int) ([]model.Article, error) {
@@ -181,10 +187,6 @@ func (f *HackerNewsFetcher) getHackerNewsArticleByID(ctx context.Context, id int
 		CreatedAt: time.Unix(articleData.Time, 0),
 		Source:    "Hacker News",
 	}, nil
-}
-
-type DevToFetcher struct {
-	client *http.Client
 }
 
 func (f *DevToFetcher) FetchArticles(ctx context.Context, limit int) ([]model.Article, error) {
