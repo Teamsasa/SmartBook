@@ -27,6 +27,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 			article.GET("/latest", s.articleHandler.GetLatestArticles)
 			article.GET("/:articleId", s.articleHandler.GetArticle)
 			article.GET("/recommended", s.articleHandler.GetRecommendedArticles)
+			article.GET("/search", s.articleHandler.SearchArticles)
 			// article.GET("/content", s.articleHandler.GetArticleContent)
 		}
 

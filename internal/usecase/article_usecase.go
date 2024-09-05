@@ -236,3 +236,32 @@ func (f *DevToFetcher) FetchArticles(ctx context.Context, limit int) ([]model.Ar
 
 	return articles, nil
 }
+
+func (u *ArticleUseCase) SearchArticles(ctx context.Context, query string) ([]model.Article, error) {
+	allArticles, err := u.GetAllArticles(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var searchResults []model.Article
+	queryLower := strings.ToLower(query)
+
+	for _, article := range allArticles {
+		if strings.Contains(strings.ToLower(article.Title), queryLower) ||
+			strings.Contains(strings.ToLower(article.Author), queryLower) ||
+			containsTag(article.Tags, queryLower) {
+			searchResults = append(searchResults, article)
+		}
+	}
+
+	return searchResults, nil
+}
+
+func containsTag(tags []string, query string) bool {
+	for _, tag := range tags {
+		if strings.Contains(strings.ToLower(tag), query) {
+			return true
+		}
+	}
+	return false
+}
