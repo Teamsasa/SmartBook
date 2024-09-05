@@ -17,7 +17,7 @@ type User struct {
 }
 
 type ArticleData struct {
-	ID        int        `json:"id" gorm:"primaryKey;autoIncrement"`
+	ID        string     `json:"id" gorm:"type:varchar(255);primaryKey"`
 	URL       string     `json:"url" gorm:"type:varchar(1000);not null"`
 	Title     string     `json:"title" gorm:"type:varchar(255);not null"`
 	Author    string     `json:"author" gorm:"type:varchar(255);not null"`
@@ -28,7 +28,7 @@ type ArticleData struct {
 type MemoData struct {
 	ID        int         `json:"id" gorm:"primaryKey;autoIncrement"`
 	UserID    string      `json:"user_id" gorm:"type:uuid;not null"`
-	ArticleID int         `json:"article_id" gorm:"not null"`
+	ArticleID string      `json:"article_id" gorm:"type:varchar(255);not null"`
 	Content   string      `json:"content" gorm:"type:text;not null"`
 	CreatedAt time.Time   `json:"created_at" gorm:"not null"`
 	UpdatedAt time.Time   `json:"updated_at" gorm:"not null"`
