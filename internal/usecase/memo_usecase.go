@@ -34,10 +34,18 @@ func (u *MemoUseCase) CreateMemo(memoCreateReq *model.MemoData, articleCreateReq
 		return tx.Error
 	}
 
-	result := tx.Create(articleCreateReq)
+	result := tx.Where("id = ?", articleCreateReq.ID).First(&model.ArticleData{})
 	if result.Error != nil {
-		tx.Rollback()
-		return result.Error
+		if result.Error == gorm.ErrRecordNotFound {
+			result = tx.Create(articleCreateReq)
+			if result.Error != nil {
+				tx.Rollback()
+				return result.Error
+			}
+		} else {
+			tx.Rollback()
+			return result.Error
+		}
 	}
 
 	result = tx.Create(memoCreateReq)
