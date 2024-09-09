@@ -9,6 +9,7 @@ import (
 
 	"gorm.io/gorm"
 
+	"github.com/gorilla/sessions"
 	_ "github.com/joho/godotenv/autoload"
 
 	"SmartBook/internal/cache"
@@ -26,7 +27,10 @@ type Server struct {
 	memoHandler    *handler.MemoHandler
 	cache          cache.Cache
 	authHandler    *handler.AuthHandler
+	store          *sessions.CookieStore
 }
+
+var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))

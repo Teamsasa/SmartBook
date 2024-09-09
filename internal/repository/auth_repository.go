@@ -3,6 +3,7 @@ package repository
 import (
 	"SmartBook/internal/model"
 	"context"
+	"errors"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -13,7 +14,7 @@ import (
 type IAuthRepository interface {
 	CreateUser(c echo.Context, user model.InputUser) (string, error)
 	InsertUser(c echo.Context, userId string, user model.InputUser) (model.User, error)
-	GetUser(c echo.Context, user model.InputUser) (model.User, error)
+	Login(c echo.Context, user model.InputUser) (model.User, error)
 }
 
 type AuthRepository struct {
@@ -45,9 +46,10 @@ func (r *AuthRepository) CreateUser(c echo.Context, user model.InputUser) (strin
 
 func (r *AuthRepository) InsertUser(c echo.Context, userId string, user model.InputUser) (model.User, error) {
 	newUser := model.User{
-		ID:    userId,
-		Name:  user.Name,
-		Email: user.Email,
+		ID:       userId,
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: user.Password,
 	}
 
 	if err := r.db.Create(&newUser).Error; err != nil {
@@ -57,11 +59,24 @@ func (r *AuthRepository) InsertUser(c echo.Context, userId string, user model.In
 	return newUser, nil
 }
 
-func (r *AuthRepository) GetUser(c echo.Context, user model.InputUser) (model.User, error) {
-	userRecord := model.User{}
-	if err := r.db.Where("email = ?", user.Email).First(&userRecord).Error; err != nil {
+func (r *AuthRepository) Login(c echo.Context, user model.InputUser) (model.User, error) {
+	var userData model.User
+	if err := r.db.Where("email = ?", user.Email).First(&userData).Error; err != nil {
 		return model.User{}, err
 	}
 
-	return userRecord, nil
+	if user.Password != userData.Password {
+		return model.User{}, errors.New("password is incorrect")
+	}
+
+	userRecord, err := r.auth.GetUserByEmail(context.Background(), user.Email)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return model.User{
+		ID:    userRecord.UID,
+		Email: userRecord.Email,
+		Name:  userRecord.DisplayName,
+	}, nil
 }

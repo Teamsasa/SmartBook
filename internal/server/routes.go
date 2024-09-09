@@ -1,6 +1,7 @@
 package server
 
 import (
+	"SmartBook/internal/middleware/auth"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -12,6 +13,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	authMiddleware := auth.NewAuthMiddleware(s.store)
+
 	api := e.Group("/api")
 	{
 		// // ユーザー関連
@@ -22,7 +25,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		}
 
 		// 記事関連
-		article := api.Group("/articles")
+		article := api.Group("/articles", authMiddleware.SessionMiddleware())
 		{
 			article.GET("/latest", s.articleHandler.GetLatestArticles)
 			article.GET("/:articleId", s.articleHandler.GetArticle)
@@ -31,7 +34,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 		}
 
 		// メモ関連
-		memo := api.Group("/memo")
+		memo := api.Group("/memo", authMiddleware.SessionMiddleware())
 		{
 			memo.POST("/", s.memoHandler.CreateMemoHandler)             // メモを作成
 			memo.GET("/:articleId", s.memoHandler.GetMemoHandler)       // メモを取得

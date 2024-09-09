@@ -8,6 +8,7 @@ type User struct {
 	ID          string     `json:"id" gorm:"type:varchar(255);primaryKey"`
 	Name        string     `json:"name" gorm:"type:varchar(255);not null"`
 	Email       string     `json:"email" gorm:"type:varchar(255);unique;not null"`
+	Password    string     `json:"password" gorm:"type:varchar(255);not null"`
 	CreatedAt   time.Time  `json:"created_at" gorm:"not null"`
 	UpdatedAt   time.Time  `json:"updated_at" gorm:"not null"`
 	Memos       []MemoData `json:"memos" gorm:"foreignKey:UserID"`

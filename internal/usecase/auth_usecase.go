@@ -38,7 +38,7 @@ func (u *authUsecase) SignUp(c echo.Context, input model.InputUser) (model.User,
 }
 
 func (u *authUsecase) SignIn(c echo.Context, input model.InputUser) (model.User, error) {
-	user, err := u.authRepository.GetUser(c, input)
+	user, err := u.authRepository.Login(c, input)
 	if err != nil {
 		return model.User{}, err
 	}

@@ -14,9 +14,11 @@ func CreateSession(c echo.Context, userId string) error {
 		return err
 	}
 
+	// セッションにユーザーIDを保存
 	session.Values["userId"] = userId
 
-	err = session.Save(c.Request(), c.Response())
+	// Echoのレスポンスをhttp.ResponseWriterにキャストしてセッションを保存
+	err = session.Save(c.Request(), c.Response().Writer)
 	if err != nil {
 		return err
 	}
