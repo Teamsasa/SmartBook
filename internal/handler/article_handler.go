@@ -79,3 +79,23 @@ func (h *ArticleHandler) GetAllArticles(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, articles)
 }
+
+func (h *ArticleHandler) SearchArticles(c echo.Context) error {
+	ctx := c.Request().Context()
+	query := c.QueryParam("q")
+
+	if query == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Search query is required"})
+	}
+
+	articles, err := h.articleUseCase.SearchArticles(ctx, query)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to search articles"})
+	}
+
+	if len(articles) == 0 {
+		return c.JSON(http.StatusOK, map[string]string{"message": "No articles found matching the query"})
+	}
+
+	return c.JSON(http.StatusOK, articles)
+}

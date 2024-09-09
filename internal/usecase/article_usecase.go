@@ -7,11 +7,20 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
 	"golang.org/x/sync/errgroup"
 )
+
+type HackerNewsFetcher struct {
+	client *http.Client
+}
+
+type DevToFetcher struct {
+	client *http.Client
+}
 
 type ArticleFetcher interface {
 	FetchArticles(ctx context.Context, limit int) ([]model.Article, error)
@@ -52,6 +61,7 @@ func NewArticleUseCase(client *http.Client, cache Cache) (*ArticleUseCase, error
 
 func (u *ArticleUseCase) GetAllArticles(ctx context.Context) ([]model.Article, error) {
 	if cachedArticles, found := u.cache.Get("all_articles"); found {
+		fmt.Println("🟢 Cache hit: all_articles")
 		return cachedArticles.([]model.Article), nil
 	}
 
@@ -112,10 +122,6 @@ func (u *ArticleUseCase) GetArticleByID(ctx context.Context, id string) (*model.
 	}
 
 	return nil, fmt.Errorf("article not found: %s", id)
-}
-
-type HackerNewsFetcher struct {
-	client *http.Client
 }
 
 func (f *HackerNewsFetcher) FetchArticles(ctx context.Context, limit int) ([]model.Article, error) {
@@ -183,10 +189,6 @@ func (f *HackerNewsFetcher) getHackerNewsArticleByID(ctx context.Context, id int
 	}, nil
 }
 
-type DevToFetcher struct {
-	client *http.Client
-}
-
 func (f *DevToFetcher) FetchArticles(ctx context.Context, limit int) ([]model.Article, error) {
 	url := fmt.Sprintf("https://dev.to/api/articles?top=1&per_page=%d", limit)
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -233,4 +235,33 @@ func (f *DevToFetcher) FetchArticles(ctx context.Context, limit int) ([]model.Ar
 	}
 
 	return articles, nil
+}
+
+func (u *ArticleUseCase) SearchArticles(ctx context.Context, query string) ([]model.Article, error) {
+	allArticles, err := u.GetAllArticles(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var searchResults []model.Article
+	queryLower := strings.ToLower(query)
+
+	for _, article := range allArticles {
+		if strings.Contains(strings.ToLower(article.Title), queryLower) ||
+			strings.Contains(strings.ToLower(article.Author), queryLower) ||
+			containsTag(article.Tags, queryLower) {
+			searchResults = append(searchResults, article)
+		}
+	}
+
+	return searchResults, nil
+}
+
+func containsTag(tags []string, query string) bool {
+	for _, tag := range tags {
+		if strings.Contains(strings.ToLower(tag), query) {
+			return true
+		}
+	}
+	return false
 }
