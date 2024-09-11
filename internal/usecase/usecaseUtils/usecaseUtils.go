@@ -1,9 +1,10 @@
 package usecaseUtils
 
 import (
+	"os"
+
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
-	"os"
 )
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
