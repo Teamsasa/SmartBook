@@ -10,14 +10,12 @@ import (
 
 type ArticleHandler struct {
 	articleUseCase *usecase.ArticleUseCase
-	// userUseCase    *usecase.UserUseCase  // ユーザー情報を取得するためのユースケース(masayamaが多分作ってくれる)
 }
 
 // func NewArticleHandler(articleUseCase *usecase.ArticleUseCase, userUseCase *usecase.UserUseCase) *ArticleHandler {
 func NewArticleHandler(articleUseCase *usecase.ArticleUseCase) *ArticleHandler {
 	return &ArticleHandler{
 		articleUseCase: articleUseCase,
-		// userUseCase:    userUseCase,
 	}
 }
 
