@@ -29,12 +29,18 @@ func (u *authUsecase) SignUp(c echo.Context, input model.InputUser) (model.User,
 		return model.User{}, err
 	}
 
-	res, err := u.authRepository.InsertUser(c, userId, input)
+	user, err := u.authRepository.InsertUser(c, userId, input)
 	if err != nil {
 		return model.User{}, err
 	}
 
-	return res, nil
+	// ユーザー作成後、自動的にセッションを作成
+	err = usecaseUtils.CreateSession(c, user.ID)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return user, nil
 }
 
 func (u *authUsecase) SignIn(c echo.Context, input model.InputUser) (model.User, error) {

@@ -34,7 +34,11 @@ func (h *AuthHandler) SignUp(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, res)
+	// ユーザー情報とセッション作成成功のメッセージを返す
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"user":    res,
+		"message": "ユーザー登録とサインインが完了しました",
+	})
 }
 
 func (h *AuthHandler) SignIn(c echo.Context) error {
