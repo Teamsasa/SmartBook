@@ -39,8 +39,8 @@ func main() {
 func insertTestData(dbConn *gorm.DB) {
 	// テストデータを定義
 	users := []model.User{
-		{ID: "0440acdf-9ff3-65ad-51fb-55e95bb230f9", Name: "Test User 1", Email: "test1@example.com"},
-		{ID: "eae1114f-5b80-4453-8043-79a086854222", Name: "Test User 2", Email: "test2@example.com"},
+		// {ID: "0440acdf-9ff3-65ad-51fb-55e95bb230f9", Name: "Test User 1", Email: "test1@example.com"},
+		// {ID: "eae1114f-5b80-4453-8043-79a086854222", Name: "Test User 2", Email: "test2@example.com"},
 	}
 
 	articles := []model.ArticleData{}

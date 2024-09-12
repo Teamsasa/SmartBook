@@ -32,10 +32,13 @@ func (m *authMiddleware) SessionMiddleware() echo.MiddlewareFunc {
 			}
 
 			// セッション内の"userId"を確認
-			userId, ok := session.Values["userId"].(string)
-			if !ok || userId == "" {
+			userID, ok := session.Values["userId"].(string)
+			if !ok || userID == "" {
 				return echo.NewHTTPError(http.StatusUnauthorized, "Not authenticated")
 			}
+
+			// ユーザーIDをコンテキストに設定
+			c.Set("userID", userID)
 
 			// 認証が成功した場合、次のハンドラーを実行
 			return next(c)

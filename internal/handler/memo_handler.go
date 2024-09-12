@@ -20,7 +20,7 @@ func NewMemoHandler(memoUseCase *usecase.MemoUseCase) *MemoHandler {
 }
 
 func (h *MemoHandler) GetMemosHandler(c echo.Context) error {
-	userID := "0440acdf-9ff3-65ad-51fb-55e95bb230f9" // tokenなりから取得
+	userID := c.Get("userID").(string)
 
 	memos, err := h.memoUseCase.GetMemos(userID)
 	if err != nil {
@@ -31,7 +31,7 @@ func (h *MemoHandler) GetMemosHandler(c echo.Context) error {
 }
 
 func (h *MemoHandler) CreateMemoHandler(c echo.Context) error {
-	userID := "0440acdf-9ff3-65ad-51fb-55e95bb230f9" // tokenなりから取得
+	userID := c.Get("userID").(string)
 
 	type CreateMemoRequest struct {
 		ArticleData *model.ArticleData `json:"article"`
@@ -72,8 +72,7 @@ func (h *MemoHandler) CreateMemoHandler(c echo.Context) error {
 }
 
 func (h *MemoHandler) UpdateMemoHandler(c echo.Context) error {
-
-	userID := "0440acdf-9ff3-65ad-51fb-55e95bb230f9" // tokenなりから取得
+	userID := c.Get("userID").(string)
 	articleID := c.Param("articleId")
 
 	if articleID == "" {
@@ -102,7 +101,7 @@ func (h *MemoHandler) UpdateMemoHandler(c echo.Context) error {
 }
 
 func (h *MemoHandler) GetMemoHandler(c echo.Context) error {
-	userID := "0440acdf-9ff3-65ad-51fb-55e95bb230f9" // tokenなりから取得
+	userID := c.Get("userID").(string)
 	articleID := c.Param("articleId")
 
 	if articleID == "" {
@@ -124,7 +123,7 @@ func (h *MemoHandler) GetMemoHandler(c echo.Context) error {
 }
 
 func (h *MemoHandler) DeleteMemoHandler(c echo.Context) error {
-	userID := "0440acdf-9ff3-65ad-51fb-55e95bb230f9" // tokenなりから取得
+	userID := c.Get("userID").(string)
 	articleID := c.Param("articleId")
 
 	if articleID == "" {
