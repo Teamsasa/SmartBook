@@ -30,7 +30,7 @@ type Server struct {
 	store          *sessions.CookieStore
 }
 
-var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
+// var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))

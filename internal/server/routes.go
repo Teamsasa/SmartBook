@@ -2,6 +2,7 @@ package server
 
 import (
 	"SmartBook/internal/middleware/auth"
+	"SmartBook/internal/middleware/cors"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -15,7 +16,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	authMiddleware := auth.NewAuthMiddleware(s.store)
 
-	api := e.Group("/api")
+	api := e.Group("/api", cors.SetupCORS())
 	{
 		// // ユーザー関連
 		user := api.Group("/users")
