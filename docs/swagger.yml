@@ -1,0 +1,390 @@
+openapi: 3.0.0
+info:
+  title: SmartBook API
+  version: 1.0.0
+  description: API for SmartBook application
+
+servers:
+  - url: http://localhost:8080/api
+
+paths:
+  /users/signup:
+    post:
+      summary: ユーザー登録
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputUser'
+      responses:
+        '200':
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: 不正なリクエスト
+        '500':
+          description: サーバーエラー
+
+  /users/signin:
+    post:
+      summary: ユーザーログイン
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputUser'
+      responses:
+        '200':
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: 不正なリクエスト
+        '500':
+          description: サーバーエラー
+
+  /articles/latest:
+    get:
+      summary: 最新の記事を取得
+      tags:
+        - articles
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Article'
+        '401':
+          description: 認証エラー
+        '500':
+          description: サーバーエラー
+
+  /articles/{articleId}:
+    get:
+      summary: 特定の記事を取得
+      tags:
+        - articles
+      security:
+        - sessionAuth: []
+      parameters:
+        - in: path
+          name: articleId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '401':
+          description: 認証エラー
+        '404':
+          description: 記事が見つかりません
+        '500':
+          description: サーバーエラー
+
+  /articles/recommended:
+    get:
+      summary: おすすめの記事を取得
+      tags:
+        - articles
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Article'
+        '401':
+          description: 認証エラー
+        '500':
+          description: サーバーエラー
+
+  /articles/search:
+    get:
+      summary: 記事を検索
+      tags:
+        - articles
+      security:
+        - sessionAuth: []
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Article'
+        '400':
+          description: 不正なリクエスト
+        '401':
+          description: 認証エラー
+        '500':
+          description: サーバーエラー
+
+  /memo:
+    post:
+      summary: メモを作成
+      tags:
+        - memo
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemoRequest'
+      responses:
+        '201':
+          description: 作成成功
+        '400':
+          description: 不正なリクエスト
+        '401':
+          description: 認証エラー
+        '500':
+          description: サーバーエラー
+
+  /memo/{articleId}:
+    get:
+      summary: メモを取得
+      tags:
+        - memo
+      security:
+        - sessionAuth: []
+      parameters:
+        - in: path
+          name: articleId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoData'
+        '401':
+          description: 認証エラー
+        '500':
+          description: サーバーエラー
+
+    put:
+      summary: メモを更新
+      tags:
+        - memo
+      security:
+        - sessionAuth: []
+      parameters:
+        - in: path
+          name: articleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+              required:
+                - content
+      responses:
+        '200':
+          description: 更新成功
+        '400':
+          description: 不正なリクエスト
+        '401':
+          description: 認証エラー
+        '500':
+          description: サーバーエラー
+
+    delete:
+      summary: メモを削除
+      tags:
+        - memo
+      security:
+        - sessionAuth: []
+      parameters:
+        - in: path
+          name: articleId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 削除成功
+        '401':
+          description: 認証エラー
+        '500':
+          description: サーバーエラー
+
+  /memo/list:
+    get:
+      summary: メモ一覧を取得
+      tags:
+        - memo
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MemoData'
+        '401':
+          description: 認証エラー
+        '500':
+          description: サーバーエラー
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+  schemas:
+    InputUser:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - name
+        - email
+        - password
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        interests:
+          type: array
+          items:
+            type: string
+        recent_views:
+          type: array
+          items:
+            type: string
+        likes:
+          type: array
+          items:
+            type: string
+
+    Article:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+        score:
+          type: integer
+        author:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        source:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    MemoRequest:
+      type: object
+      properties:
+        article:
+          type: object
+          properties:
+            id:
+              type: string
+            url:
+              type: string
+            title:
+              type: string
+            author:
+              type: string
+          required:
+            - id
+            - url
+            - title
+            - author
+        content:
+          type: string
+      required:
+        - article
+        - content
+
+    MemoData:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+        article_id:
+          type: string
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
